@@ -10,4 +10,4 @@ question="user query"
 
 [sample usage using ajax in js](testAPI_Javascript.php)
 
-[sample usage using ajax in jquery](testApi_JQuery.php)
+[sample usage using ajax in jquery](testApiJQuery.php)
