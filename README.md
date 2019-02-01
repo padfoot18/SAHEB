@@ -2,7 +2,9 @@
 
 ## Dummy API
 dummy api hosted at http://13.233.158.98/chat/
+
 usage:
+
 send a post request to http://13.233.158.98/chat/ containing data as
 question="user query"
 
