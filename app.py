@@ -2,7 +2,7 @@ from flask import Flask, request
 from flask_restful import Resource, Api
 from deeppavlov import build_model, configs
 from flask_cors import CORS
-
+from substitute_data import SubstituteData
 
 app = Flask(__name__)
 CORS(app)
@@ -11,7 +11,7 @@ api = Api(app)
 model = None
 paragraph = """The application process will remain open at 04th of July to 14th of August. 
                Application form for admission is available at the Somaiya website. Our hours are 9am-8pm every day. 
-               The fee amount is INR 150000 and the hostel fees is INR 5000. The application fee is the 5000. 
+               The college fee amount is INR 150000 and the hostel fees is INR 5000. The application fee is the 5000. 
                There are total 7 courses are available at the university."""
 
 
@@ -26,7 +26,7 @@ class ChatBot(Resource):
         print(question)
         answer = model([paragraph], [question])
         print(answer)
-        return answer
+        return answer[0][0]
 
 
 def load_model():
@@ -36,6 +36,7 @@ def load_model():
 
 api.add_resource(HelloWorld, '/')
 api.add_resource(ChatBot, '/chat/')
+api.add_resource(SubstituteData, '/substitute/')
 
 
 if __name__ == '__main__':
