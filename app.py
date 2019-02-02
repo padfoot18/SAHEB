@@ -9,10 +9,13 @@ CORS(app)
 api = Api(app)
 
 model = None
-paragraph = """The application process will remain open at 04th of July to 14th of August. 
-               Application form for admission is available at the Somaiya website. Our hours are 9am-8pm every day. 
-               The college fee amount is INR 150000 and the hostel fees is INR 5000. The application fee is the 5000. 
-               There are total 7 courses are available at the university."""
+paragraph = None
+values = dict()
+
+# paragraph = """The application process will remain open at 04th of July to 14th of August.
+#                Application form for admission is available at the Somaiya website. Our hours are 9am-8pm every day.
+#                The college fee amount is INR 150000 and the hostel fees is INR 5000. The application fee is the 5000.
+#                There are total 7 courses are available at the university."""
 
 
 class HelloWorld(Resource):
@@ -30,8 +33,15 @@ class ChatBot(Resource):
 
 
 def load_model():
+    # load the model into memory
     global model
     model = build_model(configs.squad.squad, download=False)
+
+
+def load_data():
+    # TODO (3) load the paragraph and all the key-value pairs into the global variables
+
+
 
 
 api.add_resource(HelloWorld, '/')
