@@ -2,7 +2,7 @@ from flask import Flask, request
 from flask_restful import Resource, Api
 from deeppavlov import build_model, configs
 from flask_cors import CORS
-from substitute_data import SubstituteData
+from substitute_data import InsertData, UpdateData, ReadData, DeleteData
 
 app = Flask(__name__)
 CORS(app)
@@ -36,7 +36,10 @@ def load_model():
 
 api.add_resource(HelloWorld, '/')
 api.add_resource(ChatBot, '/chat/')
-api.add_resource(SubstituteData, '/substitute/')
+api.add_resource(InsertData, '/api/v1/insert/')
+api.add_resource(UpdateData, '/api/v1/update/')
+api.add_resource(DeleteData, '/api/v1/delete/')
+api.add_resource(ReadData, '/api/v1/read/')
 
 
 if __name__ == '__main__':
