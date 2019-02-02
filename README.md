@@ -1,18 +1,21 @@
 # Chatbot API
 
-### Dummy API
-dummy api hosted at http://13.233.158.98/chat/
+## Installation steps:
+Under Construction
 
-usage:
 
-send a post request to http://13.233.158.98:8888/chat/ containing data as
+### Dummy API for chatting
+dummy api hosted at http://13.233.158.98/chat/  
+
+usage:  
+send a post request to http://13.233.158.98:8888/chat/ containing data as  
 question="user query"
 
-[sample usage using ajax in js](testAPI_Javascript.php)
+[sample usage using ajax in js](testAPI_Javascript.php)  
 
-[sample usage using ajax in jquery](testApiJQuery.php)
+[sample usage using ajax in jquery](testApiJQuery.php)  
 
-### Dummy API hosted for Key, Value CRUD operations
+### Dummy API hosted for Key, Value CRUD operations  
 1. Insert key-value = http://13.233.158.98:8888/api/v1/insert  
    Request ⇒ “key=”+key+”&value=”+value  
    Response ⇒ [ {‘key’:’abc’, ‘value’:100000 } , {‘key’: ‘def’, ‘value’: 100 } ]  
