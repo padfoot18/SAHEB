@@ -42,8 +42,7 @@ def load_model():
 
 def load_data():
     # TODO (3) load the paragraph and all the key-value pairs into the global variables
-
-
+    pass
 
 
 api.add_resource(HelloWorld, '/')
