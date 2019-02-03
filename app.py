@@ -4,6 +4,7 @@ from deeppavlov import build_model, configs
 from flask_cors import CORS
 from substitute_data import InsertData, UpdateData, ReadData, DeleteData
 from paragraph_api import Paragraph
+import sqlite3
 
 
 app = Flask(__name__)
@@ -40,9 +41,18 @@ def load_model():
     model = build_model(configs.squad.squad, download=False)
 
 
-def load_data():
-    # TODO (3) load the paragraph and all the key-value pairs into the global variables
-    pass
+# def load_data():
+#     # TODO (3) load the paragraph and all the key-value pairs into the global variables
+#     sql = """CREATE TABLE if not exists "blank_data" ( `key` text, `value` text, PRIMARY KEY(`key`) );
+#     CREATE TABLE "paragraph" ( `para` TEXT );"""
+#     try:
+#         conn = sqlite3.connect('test.db')
+#         conn.execute(sql)
+#     except Exception as e:
+#         print(e)
+#     finally:
+#         if conn:
+#             conn.close()
 
 
 api.add_resource(HelloWorld, '/')
@@ -51,10 +61,10 @@ api.add_resource(InsertData, '/api/v1/insert/')
 api.add_resource(UpdateData, '/api/v1/update/')
 api.add_resource(DeleteData, '/api/v1/delete/')
 api.add_resource(ReadData, '/api/v1/read/')
-# api.add_resource(Paragraph, '/data/para/')
+api.add_resource(Paragraph, '/data/para/')
 
 
 if __name__ == '__main__':
     # load_data()
-    load_model()
+    # load_model()
     app.run(host='127.0.0.1', port=8888, debug=True)
