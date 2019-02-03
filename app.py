@@ -57,11 +57,11 @@ def load_model():
 
 api.add_resource(HelloWorld, '/')
 api.add_resource(ChatBot, '/chat/')
-api.add_resource(InsertData, '/api/v1/insert/')
-api.add_resource(UpdateData, '/api/v1/update/')
-api.add_resource(DeleteData, '/api/v1/delete/')
-api.add_resource(ReadData, '/api/v1/read/')
-api.add_resource(Paragraph, '/data/para/')
+api.add_resource(InsertData, '/values/insert/')
+api.add_resource(UpdateData, '/values/update/')
+api.add_resource(DeleteData, '/values/delete/')
+api.add_resource(ReadData, '/values/read/')
+api.add_resource(Paragraph, '/para/')
 
 
 if __name__ == '__main__':
