@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="style.css" rel="stylesheet" type="text/css"  media="all" />
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" />   
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+
+</head>
+<body>
+
+<div class="container">
+      
+  <div class="row">
+    <div class="chatbox chatbox22 chatbox--tray">
+      <div class="chatbox__title">
+        <h5><a href="javascript:void()">Ask me anything!</a></h5>
+        <button class="chatbox__title__close">
+            <span>
+                <svg viewBox="0 0 12 12" width="12px" height="12px">
+                    <line stroke="#FFFFFF" x1="11.75" y1="0.25" x2="0.25" y2="11.75"></line>
+                    <line stroke="#FFFFFF" x1="11.75" y1="11.75" x2="0.25" y2="0.25"></line>
+                </svg>
+            </span>
+        </button>
+    </div>
+    <div class="chatbox__body">
+        <div class="chatbox__body__message chatbox__body__message--left">
+          <div class="clearfix"></div>    
+        </div>
+        <div class="chatbox__body__message chatbox__body__message--right">
+          <div class="clearfix"></div>
+        </div>
+  
+    </div>
+    <div class="panel-footer">
+                    <div class="input-group">
+                        <input id="btn-input" type="text" class="form-control input-sm chat_set_height" align="bottom" placeholder="Type your message here..." tabindex="0" dir="ltr" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" contenteditable="true" />
+            
+                        <span class="input-group-btn">
+                            <button class="btn bt_bg btn-sm" id="btn-chat" onclick="loadDoc()">
+                                Send</button>
+                        </span>
+                    </div>
+                </div>
+</div>
+      
+  </div>
+  </div>
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>    
+  
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script>
+  (function($) {
+    $(document).ready(function() {
+        var $chatbox = $('.chatbox'),
+            $chatboxTitle = $('.chatbox__title'),
+            $chatboxTitleClose = $('.chatbox__title__close'),
+            $chatboxCredentials = $('.chatbox__credentials');
+        $chatboxTitle.on('click', function() {
+            $chatbox.toggleClass('chatbox--tray');
+        });
+        // $chatboxTitleClose.on('click', function(e) {
+        //     e.stopPropagation();
+        //     $chatbox.addClass('chatbox--closed');
+        // });
+        $chatbox.on('transitionend', function() {
+            if ($chatbox.hasClass('chatbox--closed')) $chatbox.remove();
+        });
+        $(document).ready(function(){
+
+        $("#btn-chat").click(function(){
+          var content = document.getElementById("btn-input").value ;
+          // alert(content);
+          });
+
+        })
+    });
+})(jQuery);
+
+function loadDoc() {
+  var xhttp = new XMLHttpRequest();
+  var question = document.getElementById("btn-chat").value;
+  // document.getElementById("answer").innerHTML = document.getElementById("answer").innerHTML + question + "<br>";
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+           // document.getElementById("answer").innerHTML = document.getElementById("answer").innerHTML + this.responseText + "<br><br>";
+      alert(this.responseText);
+    }
+  };
+  xhttp.open("POST", " http://13.233.158.98:8888/chat/", true);
+  xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+  xhttp.send("question="+question);
+}
+</script>
+</body>
+</html>
