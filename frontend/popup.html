@@ -28,11 +28,35 @@
         </button>
     </div>
     <div class="chatbox__body">
-        <div class="chatbox__body__message chatbox__body__message--left">
-          <div class="clearfix"></div>    
-        </div>
-        <div class="chatbox__body__message chatbox__body__message--right">
+      <div class="chatbox__body__message chatbox__body__message--left">
+          <img src="images/kjsce_logo.png" alt="Picture">
           <div class="clearfix"></div>
+          <div class="ul_section_full">
+            <ul class="ul_msg">
+            <li>Hello! How may I help you? </li>
+            </ul>
+            <div class="clearfix"></div>
+          </div>
+        </div>
+        <div class="chatbox__body__message chatbox__body__message--right" style="display:none;" id="ques1">
+          <img src="images/user_img.png" alt="Picture">
+          <div class="clearfix"></div>
+          <div class="ul_section_full">
+            <ul class="ul_msg">
+            <li><input id="user_msg" type="text"> </li>
+            </ul>
+            <div class="clearfix"></div>
+          </div>    
+        </div>
+        <div class="chatbox__body__message chatbox__body__message--left" style="display:none;" id="reply1">
+          <img src="images/kjsce_logo.png" alt="Picture">
+          <div class="clearfix"></div>
+          <div class="ul_section_full">
+            <ul class="ul_msg">
+            <li><input id="reply_msg" type="text"> </li>
+            </ul>
+            <div class="clearfix"></div>
+          </div>
         </div>
   
     </div>
@@ -41,7 +65,7 @@
                         <input id="btn-input" type="text" class="form-control input-sm chat_set_height" align="bottom" placeholder="Type your message here..." tabindex="0" dir="ltr" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" contenteditable="true" />
             
                         <span class="input-group-btn">
-                            <button class="btn bt_bg btn-sm" id="btn-chat" onclick="loadDoc()">
+                            <button class="btn bt_bg btn-sm" id="btn-chat" onclick="loadDoc()" >
                                 Send</button>
                         </span>
                     </div>
@@ -83,17 +107,23 @@
 
 function loadDoc() {
   var xhttp = new XMLHttpRequest();
-  var question = document.getElementById("btn-chat").value;
+  var question = document.getElementById("btn-input").value;
+  document.getElementById("user_msg").value=question;
+  document.getElementById("btn-input").value='';
+  document.getElementById('ques1').style.display = "block";
   // document.getElementById("answer").innerHTML = document.getElementById("answer").innerHTML + question + "<br>";
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
            // document.getElementById("answer").innerHTML = document.getElementById("answer").innerHTML + this.responseText + "<br><br>";
-      alert(this.responseText);
+      // alert(this.responseText);
+      document.getElementById("reply_msg").value=this.responseText;
     }
   };
   xhttp.open("POST", " http://13.233.158.98:8888/chat/", true);
   xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
   xhttp.send("question="+question);
+  document.getElementById('reply1').style.display = "block";
+  // question = " ";
 }
 </script>
 </body>
