@@ -53,7 +53,7 @@
           <div class="clearfix"></div>
           <div class="ul_section_full">
             <ul class="ul_msg">
-            <li><input id="reply_msg" type="text"> </li>
+                <li><p id="reply_msg" type="text"></p> </li>
             </ul>
             <div class="clearfix"></div>
           </div>
@@ -116,10 +116,10 @@ function loadDoc() {
     if (this.readyState == 4 && this.status == 200) {
            // document.getElementById("answer").innerHTML = document.getElementById("answer").innerHTML + this.responseText + "<br><br>";
       // alert(this.responseText);
-      document.getElementById("reply_msg").value=this.responseText;
+      document.getElementById("reply_msg").innerHTML=this.responseText;
     }
   };
-  xhttp.open("POST", " http://13.233.158.98:8888/chat/", true);
+  xhttp.open("POST", " http://localhost:8888/chat/", true);
   xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
   xhttp.send("question="+question);
   document.getElementById('reply1').style.display = "block";

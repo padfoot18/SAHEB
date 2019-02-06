@@ -5,6 +5,7 @@ from flask_cors import CORS
 from substitute_data import InsertData, UpdateData, ReadData, DeleteData
 from paragraph_api import Paragraph
 import sqlite3
+import re
 
 
 app = Flask(__name__)
@@ -30,9 +31,14 @@ class ChatBot(Resource):
     def post(self):
         question = request.form['question']
         print(question)
-        answer = model([paragraph], [question])
+        answer = model([paragraph], [question])[0][0]
+        if re.match('##[^\s\.]*', answer):
+            keys = re.findall('##[^\s\.]*', answer)
+            print(keys)
+            for k in keys:
+                answer = re.sub(k, values[k[2:]], answer)
         print(answer)
-        return answer[0][0]
+        return answer
 
 
 def load_model():
@@ -41,18 +47,32 @@ def load_model():
     model = build_model(configs.squad.squad, download=False)
 
 
-# def load_data():
-#     # TODO (3) load the paragraph and all the key-value pairs into the global variables
-#     sql = """CREATE TABLE if not exists "blank_data" ( `key` text, `value` text, PRIMARY KEY(`key`) );
-#     CREATE TABLE "paragraph" ( `para` TEXT );"""
-#     try:
-#         conn = sqlite3.connect('test.db')
-#         conn.execute(sql)
-#     except Exception as e:
-#         print(e)
-#     finally:
-#         if conn:
-#             conn.close()
+def load_data():
+    # TODO (3) load the paragraph and all the key-value pairs into the global variables
+    global paragraph
+    global values
+    para_sql = "select * from paragraph;"
+    values_sql = "select * from blank_data;"
+    try:
+        conn = sqlite3.connect('test.db')
+        cursor = conn.cursor()
+        cursor.execute(para_sql)
+        paragraph = cursor.fetchall()[0][0]
+        cursor.execute(values_sql)
+        values_list = cursor.fetchall()
+
+        for i in values_list:
+            values.update({i[0]: i[1]})
+
+        print(paragraph)
+        print(values)
+
+
+    except Exception as e:
+        print(e)
+    finally:
+        if conn:
+            conn.close()
 
 
 api.add_resource(HelloWorld, '/')
@@ -65,6 +85,6 @@ api.add_resource(Paragraph, '/para/')
 
 
 if __name__ == '__main__':
-    # load_data()
-    # load_model()
+    load_data()
+    load_model()
     app.run(host='127.0.0.1', port=8888, debug=True)
