@@ -1,8 +1,23 @@
 # Chatbot API
 
-## Installation steps:
-Under Construction
+## Requirements
+Python 3.6
 
+## Installation steps:
+Currently we support Linux and Windows platforms and Python 3.6
+Python 3.5 is not supported!
+Windows platform requires Git for Windows (for example, git), Visual Studio 2015/2017 with C++ build tools installed!
+Create a virtual environment with Python 3.6:
+ virtualenv env
+Activate the environment:
+Linux
+ source ./env/bin/activate
+Windows
+ .\env\Scripts\activate.bat
+Install Tensorflow (version -- 1.10.0)
+pip install tensorflow==1.10.0
+Install the package inside this virtual environment:
+ pip install deeppavlov
 
 ### Dummy API for chatting
 dummy api hosted at http://13.233.158.98:8888/chat/  
