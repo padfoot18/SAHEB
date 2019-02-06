@@ -43,7 +43,7 @@
           <div class="clearfix"></div>
           <div class="ul_section_full">
             <ul class="ul_msg">
-            <li><input id="user_msg" type="text"> </li>
+            <li id="user_msg"> </li>
             </ul>
             <div class="clearfix"></div>
           </div>    
@@ -53,7 +53,7 @@
           <div class="clearfix"></div>
           <div class="ul_section_full">
             <ul class="ul_msg">
-                <li><p id="reply_msg" type="text"></p> </li>
+                <li id="reply_msg"> </li>
             </ul>
             <div class="clearfix"></div>
           </div>
@@ -108,7 +108,7 @@
 function loadDoc() {
   var xhttp = new XMLHttpRequest();
   var question = document.getElementById("btn-input").value;
-  document.getElementById("user_msg").value=question;
+  document.getElementById("user_msg").innerHTML=question;
   document.getElementById("btn-input").value='';
   document.getElementById('ques1').style.display = "block";
   // document.getElementById("answer").innerHTML = document.getElementById("answer").innerHTML + question + "<br>";

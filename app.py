@@ -32,8 +32,10 @@ class ChatBot(Resource):
         question = request.form['question']
         print(question)
         answer = model([paragraph], [question])[0][0]
-        if re.match('##[^\s\.]*', answer):
-            keys = re.findall('##[^\s\.]*', answer)
+        print(answer)
+
+        keys = re.findall('##[^\s\.]*', answer)
+        if keys:
             print(keys)
             for k in keys:
                 answer = re.sub(k, values[k[2:]], answer)
@@ -67,7 +69,6 @@ def load_data():
         print(paragraph)
         print(values)
 
-
     except Exception as e:
         print(e)
     finally:
@@ -75,7 +76,7 @@ def load_data():
             conn.close()
 
 
-api.add_resource(HelloWorld, '/')
+
 api.add_resource(ChatBot, '/chat/')
 api.add_resource(InsertData, '/values/insert/')
 api.add_resource(UpdateData, '/values/update/')
