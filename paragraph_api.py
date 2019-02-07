@@ -9,7 +9,7 @@ class Paragraph(Resource):
         Accepts a get request.
         :return: entire paragraph present in the database
         """
-        # TODO (1) when a get request is performed, return the existing paragraph to the caller
+        # DONE (1) when a get request is performed, return the existing paragraph to the caller
         try:
             connection = sqlite3.connect('test.db')
             c = connection.cursor()

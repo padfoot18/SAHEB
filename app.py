@@ -16,15 +16,25 @@ model = None
 paragraph = None
 values = dict()
 
-# paragraph = """The application process will remain open at 04th of July to 14th of August.
-#                Application form for admission is available at the Somaiya website. Our hours are 9am-8pm every day.
-#                The college fee amount is INR 150000 and the hostel fees is INR 5000. The application fee is the 5000.
-#                There are total 7 courses are available at the university."""
-
 
 class HelloWorld(Resource):
     def get(self):
         return {'hello': 'world'}
+
+
+@app.route('/hello/')
+def hello_world():
+    return 'Hello, World!'
+
+
+@app.before_first_request
+def init_stuff():
+    """
+    Initialize the data and the model before first request is processed.
+    :return: None
+    """
+    load_data()
+    load_model()
 
 
 class ChatBot(Resource):
@@ -34,7 +44,7 @@ class ChatBot(Resource):
         answer = model([paragraph], [question])[0][0]
         print(answer)
 
-        keys = re.findall('##[^\s\.]*', answer)
+        keys = re.findall('##[^\s.]*', answer)
         if keys:
             print(keys)
             for k in keys:
@@ -50,7 +60,7 @@ def load_model():
 
 
 def load_data():
-    # TODO (3) load the paragraph and all the key-value pairs into the global variables
+    # DONE (3) load the paragraph and all the key-value pairs into the global variables
     global paragraph
     global values
     para_sql = "select * from paragraph;"
@@ -76,7 +86,6 @@ def load_data():
             conn.close()
 
 
-
 api.add_resource(ChatBot, '/chat/')
 api.add_resource(InsertData, '/values/insert/')
 api.add_resource(UpdateData, '/values/update/')
@@ -86,6 +95,6 @@ api.add_resource(Paragraph, '/para/')
 
 
 if __name__ == '__main__':
-    load_data()
-    load_model()
+    # load_data()
+    # load_model()
     app.run(host='127.0.0.1', port=8888, debug=True)
