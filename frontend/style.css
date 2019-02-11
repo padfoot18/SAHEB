@@ -137,15 +137,19 @@ z-index: 999;
 .chatbox__credentials .form-control {
     -webkit-box-shadow: none;
     box-shadow: none;
+    
 }
 
 .chatbox__body {
     overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .chatbox__body__message {
     position: relative;
+    overflow-wrap: break-word;
 }
+
 
 .chatbox__body__message p {
     padding: 15px;
@@ -246,15 +250,15 @@ border-radius: 4px;
     background-color: #fff;
     -webkit-box-shadow: 1px 1px rgba(100, 100, 100, 0.1);
     box-shadow: 1px 1px rgba(100, 100, 100, 0.1);margin-bottom: 15px;
-padding-bottom: 5px;padding-top:15px;
+padding-bottom: 2px;padding-top:2px;
 }
 .chatbox__body__message--left .ul_section_full {
 
     margin-left: 15px;
     padding-left: 15px;
     text-align: left;
-    padding-top: 15px;
-    padding-bottom: 5px;
+    padding-top: 2px;
+    padding-bottom: 2px;
     margin-bottom: 15px;
     border-radius: 4px;
     font-size: 14px;

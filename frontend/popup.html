@@ -27,33 +27,13 @@
             </span>
         </button>
     </div>
-    <div class="chatbox__body">
+    <div class="chatbox__body" id="chatbox_body">
       <div class="chatbox__body__message chatbox__body__message--left">
           <img src="images/kjsce_logo.png" alt="Picture">
           <div class="clearfix"></div>
           <div class="ul_section_full">
             <ul class="ul_msg">
-            <li>Hello! How may I help you? </li>
-            </ul>
-            <div class="clearfix"></div>
-          </div>
-        </div>
-        <div class="chatbox__body__message chatbox__body__message--right" style="display:none;" id="ques1">
-          <img src="images/user_img.png" alt="Picture">
-          <div class="clearfix"></div>
-          <div class="ul_section_full">
-            <ul class="ul_msg">
-            <li id="user_msg"> </li>
-            </ul>
-            <div class="clearfix"></div>
-          </div>    
-        </div>
-        <div class="chatbox__body__message chatbox__body__message--left" style="display:none;" id="reply1">
-          <img src="images/kjsce_logo.png" alt="Picture">
-          <div class="clearfix"></div>
-          <div class="ul_section_full">
-            <ul class="ul_msg">
-                <li id="reply_msg"> </li>
+            <li style="font-weight:450">Hello! How may I help you? </li>
             </ul>
             <div class="clearfix"></div>
           </div>
@@ -65,7 +45,7 @@
                         <input id="btn-input" type="text" class="form-control input-sm chat_set_height" align="bottom" placeholder="Type your message here..." tabindex="0" dir="ltr" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" contenteditable="true" />
             
                         <span class="input-group-btn">
-                            <button class="btn bt_bg btn-sm" id="btn-chat" onclick="loadDoc()" >
+                            <button class="btn bt_bg btn-sm" id="btn-chat" onclick="loadDoc()">
                                 Send</button>
                         </span>
                     </div>
@@ -77,7 +57,21 @@
   <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>    
   
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
 <script>
+	var input = document.getElementById("btn-input");
+
+	// Execute a function when the user releases a key on the keyboard
+	input.addEventListener("keyup", function(event) {
+	  // Cancel the default action, if needed
+	  event.preventDefault();
+	  // Number 13 is the "Enter" key on the keyboard
+	  if (event.keyCode === 13) {
+	    // Trigger the button element with a click
+	    document.getElementById("btn-chat").click();
+	  }
+	});
+
   (function($) {
     $(document).ready(function() {
         var $chatbox = $('.chatbox'),
@@ -108,22 +102,61 @@
 function loadDoc() {
   var xhttp = new XMLHttpRequest();
   var question = document.getElementById("btn-input").value;
-  document.getElementById("user_msg").innerHTML=question;
+
+  var d = new Date(); // for now
+  var hours = d.getHours(); // => 9
+  var minutes = d.getMinutes(); // =>  30
+  var time = hours + ':' + minutes;
+
+
+  var userDiv = '<div class="chatbox__body__message chatbox__body__message--right" style="display: block;"	>'+
+        '<img src="images/user_img.png" alt="Picture">'+
+        '<div class="clearfix"></div>'+
+        '<div class="ul_section_full">'+
+         '  <ul class="ul_msg">'+
+            '<li><div style="display:inline; font-weight:450">'+question+'</div><div id="timeUser" style="font-size:10px; text-align: left; padding-right: 7px;display:inline; padding-left: 8px; font-style: italic; color:gray;">'+time+'</div>'+
+            '</li>'+
+            '</ul>'+
+            '<div class="clearfix"></div>'+
+         ' </div>'+
+        '</div>';
+  var parent = document.getElementById('chatbox_body');
+  // parent.appendChild(userDiv);
+  parent.innerHTML += userDiv;
+  //document.getElementById("user_msg").innerHTML=question;
   document.getElementById("btn-input").value='';
-  document.getElementById('ques1').style.display = "block";
+  // document.getElementById('ques1').style.display = "block";
   // document.getElementById("answer").innerHTML = document.getElementById("answer").innerHTML + question + "<br>";
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
            // document.getElementById("answer").innerHTML = document.getElementById("answer").innerHTML + this.responseText + "<br><br>";
       // alert(this.responseText);
-      document.getElementById("reply_msg").innerHTML=this.responseText;
+      //document.getElementById("reply_msg").innerHTML=this.responseText;
+      var replyDiv = '<div class="chatbox__body__message chatbox__body__message--left" style="">'+
+        '<img src="images/kjsce_logo.png" alt="Picture">'+
+        '<div class="clearfix"></div>'+
+        '<div class="ul_section_full">'+
+         '  <ul class="ul_msg">'+
+            '<li><div style="display:inline; font-weight:450">'+this.responseText+'</iv><div id="timeReply" style="font-size:10px; text-align: right; padding-right: 8px;display:inline; padding-left: 7px; font-style: italic; color:gray;">'+time+'</div>'+
+            '</li>'+
+            '</ul>'+
+            '<div class="clearfix"></div>'+
+         ' </div>'+
+        '</div>';
+      parent.innerHTML += replyDiv;
+      gotoBottom('chatbox_body');
     }
   };
-  xhttp.open("POST", " http://localhost:8888/chat/", true);
+  xhttp.open("POST", " http://13.233.158.98:8888/chat/", true);
   xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
   xhttp.send("question="+question);
-  document.getElementById('reply1').style.display = "block";
+  // document.getElementById('reply1').style.display = "block";
   // question = " ";
+}
+
+function gotoBottom(id){
+   var element = document.getElementById(id);
+   element.scrollTop = element.scrollHeight - element.clientHeight;
 }
 </script>
 </body>
