@@ -8,6 +8,8 @@ import sqlite3
 import re
 from keras.models import load_model
 import string
+from helper.py import *
+import np
 # Load stop words
 import nltk
 from nltk.corpus import stopwords
@@ -18,7 +20,7 @@ CORS(app)
 api = Api(app)
 
 model = None
-model_small_talk = None
+model_basic_response = None
 paragraph = None
 values = dict()
 word_to_index, index_to_word, word_to_vec_map = None
@@ -54,15 +56,18 @@ class ChatBot(Resource):
 
 
         if answer == '' or answer == None:
-            # small talk model
+            # basic response model
             X_test = sentences_to_indices(np.array(test_sentence), word_to_index, maxLen)
-            pred = model_small_talk.predict(X_test)
+            pred = model_basic_response.predict(X_test)
             pred_index = np.argmax(pred, axis=1)
 
+            basic_reply = ['Hi there, how can I help?', 'See you later, thanks for visiting', 'Happy to help!']
+
             if pred_index in [0, 1, 2]:
+                answer = basic_reply[pred_index]
                 pass
             else:
-                answer = "Sorry, I couldn't understand" 
+                answer = "Looks like your question is out of my scope. I am still learning but I am now only able to answer question related to Admission process" 
         else:
             keys = re.findall('##[^\s.]*', answer)
             if keys:
@@ -76,10 +81,13 @@ class ChatBot(Resource):
 def load_all_model():
     # load the model into memory
     global model
-    global model_small_talk
+    global model_basic_response
     global word_to_index, index_to_word, word_to_vec_map
+    # paragraph model
     model = build_model(configs.squad.squad, download=False)
-    model_small_talk = load_model('./model/small_talk/trained_lstm_128_128_dropout_4_3.h5')
+    # basic response model
+    model_basic_response = load_model('./model/basic_response_model/trained_lstm_128_128_dropout_4_3.h5')
+    # glove embedding
     word_to_index, index_to_word, word_to_vec_map = read_glove_vecs('./model/glove/glove.6B.50d.txt')
 
 
