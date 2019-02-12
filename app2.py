@@ -65,7 +65,6 @@ class ChatBot(Resource):
 
             if pred_index in [0, 1, 2]:
                 answer = basic_reply[pred_index]
-                pass
             else:
                 answer = "Looks like your question is out of my scope. I am still learning but I am now only able to answer question related to Admission process" 
         else:
@@ -84,7 +83,7 @@ def load_all_model():
     global model_basic_response
     global word_to_index, index_to_word, word_to_vec_map
     # paragraph model
-    model = build_model(configs.squad.squad, download=False)
+    model = build_model(configs.squad.multi_squad_noans, download=False)
     # basic response model
     model_basic_response = load_model('./model/basic_response_model/trained_lstm_128_128_dropout_4_3.h5')
     # glove embedding
