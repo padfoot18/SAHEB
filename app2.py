@@ -87,7 +87,7 @@ def load_all_model():
     # basic response model
     model_basic_response = load_model('./model/basic_response_model/trained_lstm_128_128_dropout_4_3.h5')
     # glove embedding
-    word_to_index, index_to_word, word_to_vec_map = read_glove_vecs('./model/glove/glove.6B.50d.txt')
+    word_to_index, index_to_word, word_to_vec_map = read_glove_vecs('./model/glove/glove.6B.50d.h5')
 
 
 def load_data():
