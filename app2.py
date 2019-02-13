@@ -10,6 +10,8 @@ from keras.models import load_model
 from helper import *
 import numpy as np
 import tensorflow as tf
+from nltk.corpus import stopwords
+from string import punctuation
 
 app = Flask(__name__)
 CORS(app)
@@ -49,12 +51,72 @@ def init_stuff():
 
 class ChatBot(Resource):
     def post(self):
+        threshold = 45000
+        minimum_match = 1
+
         question = request.form['question']
         question = question.strip()
         question = question
         if question[-1] != "?":
             question += '?'
         print(question)
+
+        print(question)
+
+        answer = None
+        answer_main = None
+
+        with g2.as_default():
+            answer = model([paragraph], [question])
+            print(answer)
+            answer_main = answer[0][0]
+
+
+
+
+
+        keys = re.findall('zxyw[^\s.]*', answer_main)
+        if keys:
+            print(keys)
+            for k in keys:
+                answer_main = re.sub(k, values[k[4:]], answer_main)
+        print(answer_main)
+
+        if answer[2][0] < threshold:
+            question_list = removeStopWords(question)
+            answer_list = removeStopWords(answer_main)
+            print(question_list, answer_list)
+            count = 0
+            for i in question_list:
+                for j in answer_list:
+                    if i == j:
+                        count += 1
+            if count >= minimum_match:
+                return answer_main
+            else:
+
+
+
+
+
+                return "Sorry i didn't get that!"
+        else:
+            return answer_main
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         with g2.as_default():
             answer = model([paragraph], [question])
@@ -86,6 +148,11 @@ class ChatBot(Resource):
         return answer
 
 
+def removeStopWords(words):
+    customStopWords = set(stopwords.words('english') + list(punctuation))
+    return [word for word in word_tokenize(words) if word not in customStopWords]
+
+
 def load_all_model():
     # load the model into memory
     global model
@@ -100,7 +167,7 @@ def load_all_model():
 
     with g2.as_default():
         # paragraph model
-        model = build_model(configs.squad.multi_squad_noans, download=False)
+        model = build_model(configs.squad.squad, download=False)
 
     # glove embedding
     word_to_index, index_to_word, word_to_vec_map = read_glove_vecs('./model/glove/glove.6B.50d.h5')
