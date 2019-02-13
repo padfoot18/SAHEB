@@ -41,14 +41,15 @@ class ChatBot(Resource):
     def post(self):
         question = request.form['question']
         print(question)
-        answer = model([paragraph], [question])[0][0]
+        answer = model([paragraph], [question])
         print(answer)
+        answer = answer[0][0]
 
-        keys = re.findall('##[^\s.]*', answer)
+        keys = re.findall('zxyw[^\s.]*', answer)
         if keys:
             print(keys)
             for k in keys:
-                answer = re.sub(k, values[k[2:]], answer)
+                answer = re.sub(k, values[k[4:]], answer)
         print(answer)
         return answer
 

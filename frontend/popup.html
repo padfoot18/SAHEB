@@ -60,13 +60,12 @@
 
 <script>
 	var input = document.getElementById("btn-input");
-
 	// Execute a function when the user releases a key on the keyboard
 	input.addEventListener("keyup", function(event) {
 	  // Cancel the default action, if needed
 	  event.preventDefault();
 	  // Number 13 is the "Enter" key on the keyboard
-	  if (event.keyCode === 13) {
+	  if (event.keyCode === 13 && input.value != '') {
 	    // Trigger the button element with a click
 	    document.getElementById("btn-chat").click();
 	  }
@@ -81,10 +80,6 @@
         $chatboxTitle.on('click', function() {
             $chatbox.toggleClass('chatbox--tray');
         });
-        // $chatboxTitleClose.on('click', function(e) {
-        //     e.stopPropagation();
-        //     $chatbox.addClass('chatbox--closed');
-        // });
         $chatbox.on('transitionend', function() {
             if ($chatbox.hasClass('chatbox--closed')) $chatbox.remove();
         });
@@ -92,7 +87,6 @@
 
         $("#btn-chat").click(function(){
           var content = document.getElementById("btn-input").value ;
-          // alert(content);
           });
 
         })
@@ -121,23 +115,16 @@ function loadDoc() {
          ' </div>'+
         '</div>';
   var parent = document.getElementById('chatbox_body');
-  // parent.appendChild(userDiv);
   parent.innerHTML += userDiv;
-  //document.getElementById("user_msg").innerHTML=question;
   document.getElementById("btn-input").value='';
-  // document.getElementById('ques1').style.display = "block";
-  // document.getElementById("answer").innerHTML = document.getElementById("answer").innerHTML + question + "<br>";
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
-           // document.getElementById("answer").innerHTML = document.getElementById("answer").innerHTML + this.responseText + "<br><br>";
-      // alert(this.responseText);
-      //document.getElementById("reply_msg").innerHTML=this.responseText;
       var replyDiv = '<div class="chatbox__body__message chatbox__body__message--left" style="">'+
         '<img src="images/kjsce_logo.png" alt="Picture">'+
         '<div class="clearfix"></div>'+
         '<div class="ul_section_full">'+
          '  <ul class="ul_msg">'+
-            '<li><div style="display:inline; font-weight:450">'+this.responseText+'</iv><div id="timeReply" style="font-size:10px; text-align: right; padding-right: 8px;display:inline; padding-left: 7px; font-style: italic; color:gray;">'+time+'</div>'+
+            '<li><div style="display:inline; font-weight:450">'+JSON.parse(this.responseText)+'</iv><div id="timeReply" style="font-size:10px; text-align: right; padding-right: 8px;display:inline; padding-left: 7px; font-style: italic; color:gray;">'+time+'</div>'+
             '</li>'+
             '</ul>'+
             '<div class="clearfix"></div>'+
@@ -147,11 +134,9 @@ function loadDoc() {
       gotoBottom('chatbox_body');
     }
   };
-  xhttp.open("POST", " http://13.233.158.98:8888/chat/", true);
+  xhttp.open("POST", " http://localhost:8888/chat/", true);
   xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
   xhttp.send("question="+question);
-  // document.getElementById('reply1').style.display = "block";
-  // question = " ";
 }
 
 function gotoBottom(id){

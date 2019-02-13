@@ -1,3 +1,10 @@
+import string
+import numpy as np
+import nltk
+from nltk.corpus import stopwords
+nltk.download('stopwords')
+
+
 def sentences_to_indices(X, word_to_index, max_len):
     """
     Converts an array of sentences (strings) into an array of indices corresponding to words in the sentences.
@@ -19,8 +26,8 @@ def sentences_to_indices(X, word_to_index, max_len):
     stop_words = set(stopwords.words('english'))
     
     
-    m = X.shape[0]                                   # number of training examples
-    
+    m = X.shape[0]  # number of training examples
+
     # Initialize X_indices as a numpy matrix of zeros and the correct shape (≈ 1 line)
     X_indices = np.zeros(shape=(m, max_len))
     

@@ -7,13 +7,9 @@ from paragraph_api import Paragraph
 import sqlite3
 import re
 from keras.models import load_model
-import string
-from helper.py import *
-import np
-# Load stop words
-import nltk
-from nltk.corpus import stopwords
-nltk.download('stopwords')
+from helper import *
+import numpy as np
+import tensorflow as tf
 
 app = Flask(__name__)
 CORS(app)
@@ -23,7 +19,12 @@ model = None
 model_basic_response = None
 paragraph = None
 values = dict()
-word_to_index, index_to_word, word_to_vec_map = None
+word_to_index = None
+index_to_word = None
+word_to_vec_map = None
+
+g1 = tf.Graph()
+g2 = tf.Graph()
 
 
 class HelloWorld(Resource):
@@ -49,30 +50,38 @@ def init_stuff():
 class ChatBot(Resource):
     def post(self):
         question = request.form['question']
+        question = question.strip()
+        question = question
+        if question[-1] != "?":
+            question += '?'
         print(question)
-        answer = model([paragraph], [question])[0][0]
-        print(answer)
 
+        with g2.as_default():
+            answer = model([paragraph], [question])
+            print(answer)
+            answer = answer[0][0]
 
+        maxLen = 10
+        if answer == '' or answer is None:
 
-        if answer == '' or answer == None:
-            # basic response model
-            X_test = sentences_to_indices(np.array(test_sentence), word_to_index, maxLen)
-            pred = model_basic_response.predict(X_test)
-            pred_index = np.argmax(pred, axis=1)
+            with g1.as_default():
+                # basic response model
+                X_test = sentences_to_indices(np.array([question]), word_to_index, maxLen)
+                pred = model_basic_response.predict(X_test)
+                pred_index = int(np.argmax(pred, axis=1)[0])
 
-            basic_reply = ['Hi there, how can I help?', 'See you later, thanks for visiting', 'Happy to help!']
+                basic_reply = ['Hi there, how can I help?', 'See you later, thanks for visiting', 'Happy to help!']
 
-            if pred_index in [0, 1, 2]:
-                answer = basic_reply[pred_index]
-            else:
-                answer = "Looks like your question is out of my scope. I am still learning but I am now only able to answer question related to Admission process" 
+                if pred_index in [0, 1, 2]:
+                    answer = basic_reply[pred_index]
+                else:
+                    answer = "Looks like your question is out of my scope. I am still learning but I am now only able to answer question related to Admission process"
         else:
-            keys = re.findall('##[^\s.]*', answer)
+            keys = re.findall('zxyw[^\s.]*', answer)
             if keys:
                 print(keys)
                 for k in keys:
-                    answer = re.sub(k, values[k[2:]], answer)
+                    answer = re.sub(k, values[k[4:]], answer)
         print(answer)
         return answer
 
@@ -82,10 +91,17 @@ def load_all_model():
     global model
     global model_basic_response
     global word_to_index, index_to_word, word_to_vec_map
-    # paragraph model
-    model = build_model(configs.squad.multi_squad_noans, download=False)
-    # basic response model
-    model_basic_response = load_model('./model/basic_response_model/trained_lstm_128_128_dropout_4_3.h5')
+    global g1
+    global g2
+
+    with g1.as_default():
+        # basic response model
+        model_basic_response = load_model('./model/basic_response_model/trained_lstm_128_128_dropout_4_3.h5')
+
+    with g2.as_default():
+        # paragraph model
+        model = build_model(configs.squad.multi_squad_noans, download=False)
+
     # glove embedding
     word_to_index, index_to_word, word_to_vec_map = read_glove_vecs('./model/glove/glove.6B.50d.h5')
 
@@ -106,7 +122,6 @@ def load_data():
 
         for i in values_list:
             values.update({i[0]: i[1]})
-
         print(paragraph)
         print(values)
 
@@ -123,7 +138,6 @@ api.add_resource(UpdateData, '/values/update/')
 api.add_resource(DeleteData, '/values/delete/')
 api.add_resource(ReadData, '/values/read/')
 api.add_resource(Paragraph, '/para/')
-
 
 if __name__ == '__main__':
     # load_data()
