@@ -2,6 +2,8 @@ from flask import Flask, request
 from flask_restful import Resource, Api
 from deeppavlov import build_model, configs
 from flask_cors import CORS
+from nltk import word_tokenize
+
 from substitute_data import InsertData, UpdateData, ReadData, DeleteData
 from paragraph_api import Paragraph
 import sqlite3
@@ -53,6 +55,7 @@ class ChatBot(Resource):
     def post(self):
         threshold = 45000
         minimum_match = 1
+        maxLen = 10
 
         question = request.form['question']
         question = question.strip()
@@ -61,7 +64,6 @@ class ChatBot(Resource):
             question += '?'
         print(question)
 
-        print(question)
 
         answer = None
         answer_main = None
@@ -70,10 +72,6 @@ class ChatBot(Resource):
             answer = model([paragraph], [question])
             print(answer)
             answer_main = answer[0][0]
-
-
-
-
 
         keys = re.findall('zxyw[^\s.]*', answer_main)
         if keys:
@@ -94,58 +92,20 @@ class ChatBot(Resource):
             if count >= minimum_match:
                 return answer_main
             else:
+                with g1.as_default():
+                    # basic response model
+                    X_test = sentences_to_indices(np.array([question]), word_to_index, maxLen)
+                    pred = model_basic_response.predict(X_test)
+                    pred_index = int(np.argmax(pred, axis=1)[0])
 
+                    basic_reply = ['Hi there, how can I help?', 'See you later, thanks for visiting', 'Happy to help!']
 
-
-
-
-                return "Sorry i didn't get that!"
+                    if pred_index in [0, 1, 2]:
+                        return basic_reply[pred_index]
+                    else:
+                        return "Looks like your question is out of my scope. I am still learning but I am now only able to answer question related to Admission process"
         else:
             return answer_main
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        with g2.as_default():
-            answer = model([paragraph], [question])
-            print(answer)
-            answer = answer[0][0]
-
-        maxLen = 10
-        if answer == '' or answer is None:
-
-            with g1.as_default():
-                # basic response model
-                X_test = sentences_to_indices(np.array([question]), word_to_index, maxLen)
-                pred = model_basic_response.predict(X_test)
-                pred_index = int(np.argmax(pred, axis=1)[0])
-
-                basic_reply = ['Hi there, how can I help?', 'See you later, thanks for visiting', 'Happy to help!']
-
-                if pred_index in [0, 1, 2]:
-                    answer = basic_reply[pred_index]
-                else:
-                    answer = "Looks like your question is out of my scope. I am still learning but I am now only able to answer question related to Admission process"
-        else:
-            keys = re.findall('zxyw[^\s.]*', answer)
-            if keys:
-                print(keys)
-                for k in keys:
-                    answer = re.sub(k, values[k[4:]], answer)
-        print(answer)
-        return answer
 
 
 def removeStopWords(words):
@@ -163,14 +123,15 @@ def load_all_model():
 
     with g1.as_default():
         # basic response model
-        model_basic_response = load_model('./model/basic_response_model/trained_lstm_128_128_dropout_4_3.h5')
+
+        model_basic_response = load_model('/home/tanay/Projects/Pycharm/chatbot/model/basic_response_model/trained_lstm_128_128_dropout_4_3.h5')
 
     with g2.as_default():
         # paragraph model
         model = build_model(configs.squad.squad, download=False)
 
     # glove embedding
-    word_to_index, index_to_word, word_to_vec_map = read_glove_vecs('./model/glove/glove.6B.50d.h5')
+    word_to_index, index_to_word, word_to_vec_map = read_glove_vecs('/home/tanay/Projects/Pycharm/chatbot/model/glove/glove.6B.50d.h5')
 
 
 def load_data():
