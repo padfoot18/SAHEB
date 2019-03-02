@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    .btn{
+        width: 80px;
+    }
+</style>
+
+
+<div class="container">
+  <h2>Current Paragraph</h2>
+  <form>
+    <div class="form-group">
+      <textarea class="form-control" rows="20" id="paragraph" name="paragraph" readonly>{{ para }}</textarea>
+    </div>
+    <div class="form-group" align="right" id="not_editable" style="display: block;">
+        <button type="button" class="btn btn-primary" id="edit" name="edit" onclick="seteditable()">Edit</button>
+    </div>
+
+     <div class="form-group" align="right" id="editable" style="display: None;">
+        <button type="button" class="btn btn-success" id="submit" name="submit" onclick="submit_para()">Submit</button>
+        <button type="button" class="btn btn-danger" id="submit" name="submit" onclick="cancel_edit()">Cancel</button>
+         <button type="button" class="btn btn-success" id="key" name="key" data-toggle="modal"
+                 data-target="#add-new-modal" onclick="getSelectionText()">Add Key</button>
+    </div>
+
+  </form>
+{% include 'add_new_modal.html' %}
+{% endblock %}

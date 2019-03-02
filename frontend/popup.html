@@ -134,7 +134,7 @@ function loadDoc() {
       gotoBottom('chatbox_body');
     }
   };
-  xhttp.open("POST", " http://localhost:8888/chat/", true);
+  xhttp.open("POST", " http://127.0.0.1:5000/chat/", true);
   xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
   xhttp.send("question="+question);
 }

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+	<div class="jumbotron text-center">
+		<h1>Welcome Chatbot Admin</h1>
+		{% if session.logged_in==NULL %}
+			<a href="/login" class="btn btn-success btn-lg">Login</a>
+        {% else %}
+            <a href="/register" class="btn btn-primary btn-lg">Register</a>#}
+		{% endif %}
+	</div>
+{% endblock %}
