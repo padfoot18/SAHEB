@@ -16,7 +16,7 @@ function add_key(new_key) {
         sel.text = new_key;
     }
     //MOZILLA and others
-    else if (text_area.selectionStart || text_area.selectionStart == '0') {
+    else if (text_area.selectionStart || text_area.selectionStart === '0') {
         var startPos = text_area.selectionStart;
         var endPos = text_area.selectionEnd;
         text_area.value = text_area.value.substring(0, startPos)
@@ -32,16 +32,12 @@ function add_new() {
     value = $("#value_input").val();
     if (key != null && value != null){
         $.post(
-            "http://localhost:5000/insert/values/",
+            "http://127.0.0.1:5000/insert/values/",
             {"key": key, "value": value.replace(/\n/gi, "<br>")},
             function (data, status) {
                 if (!data["success"])
                     alert(data["error"]);
                 else {
-                    //add_row_in_table(data["data"]);
-
-                    //$('#add-new-modal').modal('toggle');
-
                     key = data["data"]["key"];
                     add_key(key);
                     $("#key_input").val("");
@@ -75,11 +71,12 @@ function submit_para(){
     xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
             if(document.getElementById('paragraph').value == this.responseText) {
-                document.getElementById('paragraph').value = this.responseText
                 alert("Update Success");
             }
-            else
-                alert("Something went wrong");
+            else{
+                alert("Something went wrong_para");
+            }
+
             cancel_edit();
         }
     };

@@ -7,8 +7,6 @@ from wtforms import Form, StringField, PasswordField, validators
 from flask import Flask, jsonify, render_template, request, flash, redirect, url_for, session
 from passlib.hash import sha256_crypt
 
-from substitute_data import InsertData, UpdateData, ReadData, DeleteData
-from paragraph_api import Paragraph
 import sqlite3
 import re
 from keras.models import load_model
@@ -76,11 +74,11 @@ class ChatBot(Resource):
             print(answer)
             answer_main = answer[0][0]
 
-        keys = re.findall('zxyw[^\s.]*', answer_main)
+        keys = re.findall('##[^\s.]*', answer_main)
         if keys:
             print(keys)
             for k in keys:
-                answer_main = re.sub(k, values[k[4:]], answer_main)
+                answer_main = re.sub(k, values[k[2:]], answer_main)
         print(answer_main)
 
         if answer[2][0] < threshold:
@@ -152,7 +150,7 @@ def load_data():
         values_list = cursor.fetchall()
 
         for i in values_list:
-            values.update({i[0]: i[1]})
+            values.update({i[1]: i[2]})
         print(paragraph)
         print(values)
 
@@ -167,7 +165,6 @@ def load_data():
 def is_logged_in(f):
     @wraps(f)
     def wrap(*args, **kwargs):
-        print(session['logged_in'])
         if 'logged_in' in session:
             return f(*args, **kwargs)
         else:
@@ -187,7 +184,7 @@ def index():
 
 @app.route('/key_values/')
 @is_logged_in
-def admin_page():
+def key_values():
     return render_template('key_vals.html', js_files=['key-val.js', ])
 
 
@@ -218,7 +215,6 @@ def read_values():
 def edit_para():
     if request.form['str']:
         new_paragraph = request.form['str']
-        print(new_paragraph)
     try:
         conn = sqlite3.connect('test.db')
         c = conn.cursor()
@@ -241,7 +237,7 @@ def edit_para():
         if conn:
             conn.close()
 
-    return render_template('index.html')
+    return new_paragraph[0][0]
 
 
 @app.route('/update/values/', methods=['POST', ])
@@ -330,9 +326,7 @@ def read_para():
     finally:
         if conn:
             conn.close()
-    return render_template('view_para.html', para = paragraph[0][0], js_files=['para.js', ])
-
-
+    return render_template('view_para.html', para=paragraph[0][0], js_files=['para.js', ])
 
 
 # register form class
@@ -379,13 +373,11 @@ def login():
     if request.method == 'POST':
         email = request.form['email']
         password_candidate = request.form['password']
-        print(email)
         connection = sqlite3.connect('test.db')
         cursor = connection.cursor()
         result = cursor.execute("SELECT * FROM users WHERE email = '"+email+"'")
         data = result.fetchall()[0]
         if result.arraysize > 0:
-            print(data)
             password = data[2]
             if sha256_crypt.verify(password_candidate, password):
                 app.logger.info('PASSWORD MATCHED')
@@ -410,9 +402,6 @@ def login():
     return render_template('login.html')
 
 
-
-
-
 # logout
 @app.route('/logout')
 @is_logged_in
@@ -426,5 +415,5 @@ api.add_resource(ChatBot, '/chat/')
 
 
 if __name__ == '__main__':
-    app.secret_key = 'qwertyuuiop'
+    app.secret_key = 'qwertyuuiopmkaejnfi;awnciquw4gabpiuebrjwabefiuawufbaeuhb'
     app.run(host='127.0.0.1', port=5000, debug=True)
