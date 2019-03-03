@@ -128,14 +128,13 @@ def load_all_model():
         # basic response model
 
         model_basic_response = load_model('./model/basic_response_model/trained_lstm_128_128_dropout_4_3.h5')
-        model_basic_response = load_model('/home/tanay/Projects/Pycharm/chatbot/model/basic_response_model/trained_lstm_128_128_dropout_4_3.h5')
 
     with g2.as_default():
         # paragraph model
         model = build_model(configs.squad.squad, download=False)
 
     # glove embedding
-    word_to_index, index_to_word, word_to_vec_map = read_glove_vecs('/home/tanay/Projects/Pycharm/chatbot/model/glove/glove.6B.50d.h5')
+    word_to_index, index_to_word, word_to_vec_map = read_glove_vecs('./model/glove/glove.6B.50d.h5')
 
 
 def load_data():

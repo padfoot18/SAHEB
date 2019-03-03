@@ -33,6 +33,7 @@ nltk==3.2.5
 numpy==1.14.5
 overrides==1.9
 pandas==0.23.1
+passlib==1.7.1
 protobuf==3.6.1
 pycparser==2.19
 pymorphy2==0.8
@@ -54,3 +55,4 @@ termcolor==1.1.0
 tqdm==4.23.4
 urllib3==1.23
 Werkzeug==0.14.1
+WTForms==2.2.1
