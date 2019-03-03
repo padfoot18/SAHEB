@@ -74,11 +74,11 @@ class ChatBot(Resource):
             print(answer)
             answer_main = answer[0][0]
 
-        keys = re.findall('##[^\s.]*', answer_main)
+        keys = re.findall('zxyw[^\s.]*', answer_main)
         if keys:
             print(keys)
             for k in keys:
-                answer_main = re.sub(k, values[k[2:]], answer_main)
+                answer_main = re.sub(k, values[k[4:]], answer_main)
         print(answer_main)
 
         if answer[2][0] < threshold:
@@ -124,7 +124,6 @@ def load_all_model():
 
     with g1.as_default():
         # basic response model
-
         model_basic_response = load_model('./model/basic_response_model/trained_lstm_128_128_dropout_4_3.h5')
 
     with g2.as_default():
