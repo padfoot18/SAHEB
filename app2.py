@@ -1,20 +1,23 @@
+# import modules for flask model
+from flask import Flask, jsonify, render_template, request, flash, redirect, url_for, session
 from flask_restful import Resource, Api
-from deeppavlov import build_model, configs
 from flask_cors import CORS
-from nltk import word_tokenize
 from functools import wraps
 from wtforms import Form, StringField, PasswordField, validators
-from flask import Flask, jsonify, render_template, request, flash, redirect, url_for, session
 from passlib.hash import sha256_crypt
 
-import sqlite3
-import re
+# import modules for chat-bot model
+from deeppavlov import build_model, configs
 from keras.models import load_model
 from helper import *
 import numpy as np
 import tensorflow as tf
 from nltk.corpus import stopwords
 from string import punctuation
+from nltk import word_tokenize
+
+import sqlite3
+import re
 
 app = Flask(__name__)
 CORS(app)
@@ -32,16 +35,6 @@ g1 = tf.Graph()
 g2 = tf.Graph()
 
 
-class HelloWorld(Resource):
-    def get(self):
-        return {'hello': 'world'}
-
-
-@app.route('/hello/')
-def hello_world():
-    return 'Hello, World!'
-
-
 @app.before_first_request
 def init_stuff():
     """
@@ -54,9 +47,13 @@ def init_stuff():
 
 class ChatBot(Resource):
     def post(self):
+        """
+        Return response for the questions asked
+        :return: answer -> str
+        """
         threshold = 45000
         minimum_match = 1
-        maxLen = 10
+        max_length = 10
 
         question = request.form['question']
         question = question.strip()
@@ -65,13 +62,8 @@ class ChatBot(Resource):
             question += '?'
         print(question)
 
-
-        answer = None
-        answer_main = None
-
         with g2.as_default():
             answer = model([paragraph], [question])
-            print(answer)
             answer_main = answer[0][0]
 
         keys = re.findall('zxyw[^\s.]*', answer_main)
@@ -82,8 +74,8 @@ class ChatBot(Resource):
         print(answer_main)
 
         if answer[2][0] < threshold:
-            question_list = removeStopWords(question)
-            answer_list = removeStopWords(answer_main)
+            question_list = remove_stop_words(question)
+            answer_list = remove_stop_words(answer_main)
             print(question_list, answer_list)
             count = 0
             for i in question_list:
@@ -95,8 +87,8 @@ class ChatBot(Resource):
             else:
                 with g1.as_default():
                     # basic response model
-                    X_test = sentences_to_indices(np.array([question]), word_to_index, maxLen)
-                    pred = model_basic_response.predict(X_test)
+                    x_test = sentences_to_indices(np.array([question]), word_to_index, max_length)
+                    pred = model_basic_response.predict(x_test)
                     pred_index = int(np.argmax(pred, axis=1)[0])
 
                     basic_reply = ['Hi there, how can I help?', 'See you later, thanks for visiting', 'Happy to help!']
@@ -109,13 +101,21 @@ class ChatBot(Resource):
             return answer_main
 
 
-def removeStopWords(words):
-    customStopWords = set(stopwords.words('english') + list(punctuation))
-    return [word for word in word_tokenize(words) if word not in customStopWords]
+def remove_stop_words(words) -> list:
+    """
+    remove stopwords from the question asked and answer of paragraph model
+    :param words: str
+    :return: list (words tokenized string)
+    """
+    custom_stopwords = set(stopwords.words('english') + list(punctuation))
+    return [word for word in word_tokenize(words) if word not in custom_stopwords]
 
 
 def load_all_model():
-    # load the model into memory
+    """
+    load paragraph model and basic response model in memory
+    :return: None
+    """
     global model
     global model_basic_response
     global word_to_index, index_to_word, word_to_vec_map
@@ -135,24 +135,23 @@ def load_all_model():
 
 
 def load_data():
-    # DONE (3) load the paragraph and all the key-value pairs into the global variables
+    """
+    retrieves paragraph and key-value data from database
+    :return: None
+    """
     global paragraph
     global values
-    para_sql = "select * from paragraph;"
-    values_sql = "select * from blank_data;"
     try:
         conn = sqlite3.connect('test.db')
         cursor = conn.cursor()
+        para_sql = "select * from paragraph;"
+        values_sql = "select * from blank_data;"
         cursor.execute(para_sql)
         paragraph = cursor.fetchall()[0][0]
         cursor.execute(values_sql)
         values_list = cursor.fetchall()
-
         for i in values_list:
             values.update({i[1]: i[2]})
-        print(paragraph)
-        print(values)
-
     except Exception as e:
         print(e)
     finally:
@@ -160,8 +159,10 @@ def load_data():
             conn.close()
 
 
-# check if user is logged in
 def is_logged_in(f):
+    """
+    decorator to check if user is logged in
+    """
     @wraps(f)
     def wrap(*args, **kwargs):
         if 'logged_in' in session:

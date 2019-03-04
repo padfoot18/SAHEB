@@ -24,8 +24,7 @@ def sentences_to_indices(X, word_to_index, max_len):
     replace_char['"'] = None
     table = str.maketrans(replace_char)
     stop_words = set(stopwords.words('english'))
-    
-    
+
     m = X.shape[0]  # number of training examples
 
     # Initialize X_indices as a numpy matrix of zeros and the correct shape (≈ 1 line)
@@ -50,17 +49,18 @@ def sentences_to_indices(X, word_to_index, max_len):
         for w in sentence_words:
             # Skip Stopwords
             if w in stop_words:
-              continue
+                continue
             # Set the (i,j)th entry of X_indices to the index of the correct word.
             if w in word_to_index:
-              X_indices[i, j] = word_to_index[w]
+                X_indices[i, j] = word_to_index[w]
             else:
-              # Handle unknown key (keep it as zeros)
-              pass
+                # Handle unknown key (keep it as zeros)
+                pass
             # Increment j to j + 1
             j += 1            
     
     return X_indices
+
 
 def read_glove_vecs(glove_file):
     with open(glove_file, 'r') as f:
