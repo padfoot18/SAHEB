@@ -11,11 +11,17 @@
           integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
           crossorigin="anonymous">
 
+      {% if css_files %}
+          {% for file in css_files %}
+              <link rel="stylesheet" href="/static/css/{{ file }}">
+          {% endfor %}
+      {% endif %}
+
     <title>Chatbot admin</title>
   </head>
   <body>
     {% include 'includes/_navbar.html' %}
-     {% block content %}
+      {% block content %}
       {% endblock %}
 
     <!-- Optional JavaScript -->

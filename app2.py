@@ -185,7 +185,7 @@ def index():
 @app.route('/key_values/')
 @is_logged_in
 def key_values():
-    return render_template('key_vals.html', js_files=['key-val.js', ])
+    return render_template('key_vals.html', js_files=['key-vals.js', ], css_files=['key-vals.css', ])
 
 
 @app.route('/read/values/')

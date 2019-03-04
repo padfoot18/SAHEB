@@ -1,18 +1,25 @@
 {% extends 'base.html' %}
 {% block content %}
+<div class="container-fluid">
+    <div>
+        <input type="text" name="search" id="search" class="form-control" placeholder="Search"
+               onkeyup="search_table()">
+    </div>
+
 
     <div>
-    <table class="table table-bordered" id="key-val-table">
-        <thead>
-        <tr>
-            <th>Key</th>
-            <th>Value</th>
-            <th>Edit</th>
-        </tr>
-        </thead>
-        <tbody id="key-val-tbody">
+        <table class="table table-bordered" id="key-val-table">
+            <thead class="table-secondary">
+            <tr>
+                <th>Key</th>
+                <th>Value</th>
+                <th>Edit</th>
+            </tr>
+            </thead>
+            <tbody id="key-val-tbody">
 
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    </div>
 </div>
 {% endblock %}
