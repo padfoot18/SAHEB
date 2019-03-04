@@ -31,6 +31,7 @@ word_to_index = None
 index_to_word = None
 word_to_vec_map = None
 
+# g1 and g2 are two graphs to load both models
 g1 = tf.Graph()
 g2 = tf.Graph()
 
@@ -55,38 +56,46 @@ class ChatBot(Resource):
         minimum_match = 1
         max_length = 10
 
+        # append '?' to the question asked
         question = request.form['question']
         question = question.strip()
         question = question
         if question[-1] != "?":
             question += '?'
-        print(question)
+        print('QUESTION:', question)
 
+        # get answer from paragraph model
         with g2.as_default():
             answer = model([paragraph], [question])
             answer_main = answer[0][0]
+        print('PARAGRAPH MODEL:', answer_main)
 
+        # Substitute actual values from database in place of keys
         keys = re.findall('zxyw[^\s.]*', answer_main)
         if keys:
             print(keys)
             for k in keys:
                 answer_main = re.sub(k, values[k[4:]], answer_main)
-        print(answer_main)
 
+        # select response from basic response and paragraph model if the confidence is less than the threshold
         if answer[2][0] < threshold:
+            # remove unnecessary stopwords from question and answer for comparison
             question_list = remove_stop_words(question)
             answer_list = remove_stop_words(answer_main)
-            print(question_list, answer_list)
+
+            # find number of words matching in question and answer
             count = 0
             for i in question_list:
                 for j in answer_list:
                     if i == j:
                         count += 1
             if count >= minimum_match:
+                # return response from paragraph model if more number of words are matched in question and answer
+                print('ANSWER:', answer_main)
                 return answer_main
             else:
+                # return response from basic response model if few words are matched in question and answer
                 with g1.as_default():
-                    # basic response model
                     x_test = sentences_to_indices(np.array([question]), word_to_index, max_length)
                     pred = model_basic_response.predict(x_test)
                     pred_index = int(np.argmax(pred, axis=1)[0])
@@ -94,10 +103,13 @@ class ChatBot(Resource):
                     basic_reply = ['Hi there, how can I help?', 'See you later, thanks for visiting', 'Happy to help!']
 
                     if pred_index in [0, 1, 2]:
+                        print('BASIC MODEL ANSWER:', basic_reply[pred_index])
                         return basic_reply[pred_index]
                     else:
-                        return "Looks like your question is out of my scope. I am still learning but I am now only able to answer question related to Admission process"
+                        return "Looks like your question is out of my scope. I am still " \
+                               "learning but I am now only able to answer question related to Admission process"
         else:
+            print('ANSWER:', answer_main)
             return answer_main
 
 
@@ -175,6 +187,7 @@ def is_logged_in(f):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    """ Display home page """
     if 'logged_in' in session:
         if session['logged_in']:
             return redirect('/para/')
@@ -185,12 +198,14 @@ def index():
 @app.route('/key_values/')
 @is_logged_in
 def key_values():
+    """ Display key-value pair table """
     return render_template('key_vals.html', js_files=['key-vals.js', ], css_files=['key-vals.css', ])
 
 
 @app.route('/read/values/')
 @is_logged_in
 def read_values():
+    """ Read key-value pair from the database """
     formatted_data = []
     try:
         connection = sqlite3.connect('test.db')
@@ -213,6 +228,7 @@ def read_values():
 @app.route('/edit_para/', methods=['POST', 'GET'])
 @is_logged_in
 def edit_para():
+    """ Update edited paragraph in the database """
     if request.form['str']:
         new_paragraph = request.form['str']
     try:
@@ -243,6 +259,7 @@ def edit_para():
 @app.route('/update/values/', methods=['POST', ])
 @is_logged_in
 def update_values():
+    """ Update edited key-value in the database """
     try:
         connection = sqlite3.connect('test.db')
         c = connection.cursor()
@@ -265,6 +282,7 @@ def update_values():
 @app.route('/insert/values/', methods=['POST', ])
 @is_logged_in
 def insert_values():
+    """ Insert new key-value pair in the database  """
     if request.form['key'] and request.form['value']:
         key = request.form['key']
         value = request.form['value']
@@ -291,6 +309,7 @@ def insert_values():
 @app.route('/delete/values', methods=['POST', ])
 @is_logged_in
 def delete_values():
+    """ Delete key value pair from the database """
     if request.form['key']:
         key = request.form['key']
 
@@ -313,6 +332,7 @@ def delete_values():
 @app.route('/para/')
 @is_logged_in
 def read_para():
+    """ Read paragraph from the database """
     try:
         conn = sqlite3.connect('test.db')
         c = conn.cursor()
@@ -329,8 +349,8 @@ def read_para():
     return render_template('view_para.html', para=paragraph[0][0], js_files=['para.js', ])
 
 
-# register form class
 class RegisterForm(Form):
+    """ Registration form for new admin user """
     name = StringField('Name', [validators.Length(min=1, max=50)])
     # username = StringField('Username', [validators.Length(min=4, max=25)])
     email = StringField('Email', [validators.Length(min=6, max=50)])
@@ -341,10 +361,10 @@ class RegisterForm(Form):
     confirm = PasswordField('Confirm Password')
 
 
-# user register
 @app.route('/register', methods=['GET', 'POST'])
 @is_logged_in
 def register():
+    """ Register new admin user """
     form = RegisterForm(request.form)
     if request.method == 'POST' and form.validate():
         name = form.name.data
@@ -367,9 +387,9 @@ def register():
     return render_template('register.html', form=form)
 
 
-# User Login
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
+    """ Log in to the admin site """
     if request.method == 'POST':
         email = request.form['email']
         password_candidate = request.form['password']
@@ -402,10 +422,10 @@ def login():
     return render_template('login.html')
 
 
-# logout
 @app.route('/logout')
 @is_logged_in
 def logout():
+    """ Log out from the site """
     session.clear()
     flash('You are now logged out ', 'success')
     return redirect(url_for('login'))
