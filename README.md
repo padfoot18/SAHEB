@@ -11,7 +11,7 @@
  `virtualenv env`
  
  2. Activate the environment:
- 	- **Linux source:** `./env/bin/activate`
+ 	- **Linux:** `source env/bin/activate`
 	- **Windows:** `.\env\Scripts\activate.bat`
 		 
  3. Install the required packages from `requirements.txt` inside this virtual environment:
@@ -24,7 +24,7 @@
     
 ## Usage Instructions:
  1. Activate the environment:
- 	- **Linux source:** `./env/bin/activate`
+ 	- **Linux:** `source env/bin/activate`
 	- **Windows:** `.\env\Scripts\activate.bat`
 	
  2. Run app2.py script:

@@ -85,7 +85,7 @@ function seteditable(){
     submit_btn_block.style.display = 'Block';
     str = document.getElementById('paragraph').value;
 }
-function cancel_edit(para){
+function cancel_edit(para, value){
     document.getElementById('paragraph').readOnly = true;
     document.getElementById('paragraph').style.display = "none";
     document.getElementById('para_div').style.display = "block";
@@ -97,25 +97,26 @@ function cancel_edit(para){
     document.getElementById('para_div').innerHTML = str;
     highlight_load();
 }
+
 function submit_para(){
-    var xhttp = new XMLHttpRequest();
-    var new_str = document.getElementById('paragraph').value;
-    xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-            if(document.getElementById('paragraph').value == this.responseText) {
+    var para = document.getElementById('paragraph');
+    var new_str = para.value;
+
+    $.post(
+        "http://127.0.0.1:5000/edit_para/",
+        {"str": new_str},
+        function (data, status){
+            if(data["para"] === new_str) {
                 alert("Update Success");
+                str = data["para"];
             }
             else{
                 alert("Something went wrong_para");
             }
-
             cancel_edit();
-        }
-    };
-    xhttp.open("POST", "http://127.0.0.1:5000/edit_para/", true);
-    xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    xhttp.send('str='+new_str);
-    str = new_str;
+        },
+        "json"
+    );
 }
 
 function getSelectionText() {
