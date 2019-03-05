@@ -43,7 +43,7 @@ def init_stuff():
     :return: None
     """
     load_data()
-    # load_all_model()
+    load_all_model()
 
 
 class ChatBot(Resource):
@@ -59,29 +59,37 @@ class ChatBot(Resource):
         # append '?' to the question asked
         question = request.form['question']
         question = question.strip()
-        question = question
         if question[-1] != "?":
             question += '?'
+        words = question.split(' ')
+        question_words = ['what', 'why', 'how', 'where', 'when']
+        counter = 0
+        for word in words:
+            if word.lower() in question_words:
+                counter += 1
+
+        if counter == 0:
+            question = 'what '+ question
         print('QUESTION:', question)
 
         # get answer from paragraph model
         with g2.as_default():
-            answer = model([paragraph], [question])
+            answer = model([paragraph.lower()], [question.lower()])
             answer_main = answer[0][0]
-        print('PARAGRAPH MODEL:', answer_main)
+        print('PARAGRAPH MODEL:', answer)
 
         # Substitute actual values from database in place of keys
         keys = re.findall('zxyw[^\s.]*', answer_main)
         if keys:
             print(keys)
             for k in keys:
-                answer_main = re.sub(k, values[k[4:]], answer_main)
+                answer_main = re.sub(k, values[k[4:].lower()], answer_main)
 
         # select response from basic response and paragraph model if the confidence is less than the threshold
         if answer[2][0] < threshold:
             # remove unnecessary stopwords from question and answer for comparison
-            question_list = remove_stop_words(question)
-            answer_list = remove_stop_words(answer_main)
+            question_list = remove_stop_words(question.lower())
+            answer_list = remove_stop_words(answer_main.lower())
 
             # find number of words matching in question and answer
             count = 0
@@ -163,7 +171,7 @@ def load_data():
         cursor.execute(values_sql)
         values_list = cursor.fetchall()
         for i in values_list:
-            values.update({i[1]: i[2]})
+            values.update({i[1].lower(): i[2]})
     except Exception as e:
         print(e)
     finally:
@@ -216,6 +224,7 @@ def read_values():
             formatted_data.append(dict(id=items[0], key=items[1], value=items[2]))
         connection.commit()
         resp = jsonify(formatted_data)
+        load_data()
     except Exception as exception:
         print(exception)
         resp = jsonify(success=False)
@@ -243,7 +252,7 @@ def edit_para():
             if item not in keys_db:
                 c.execute("DELETE FROM blank_data WHERE key='"+item+"';")
         conn.commit()
-
+        load_data()
         c.execute('select * from paragraph;')
         new_paragraph = c.fetchall()
         print(new_paragraph[0][0])
