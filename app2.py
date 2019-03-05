@@ -246,6 +246,7 @@ def edit_para():
 
         c.execute('select * from paragraph;')
         new_paragraph = c.fetchall()
+        print(new_paragraph[0][0])
     except Exception as exception:
         print(exception)
 

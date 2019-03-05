@@ -96,7 +96,7 @@ function search_table() {
   // Declare variables
   var input, filter, table, tr, td, i, txtValue;
   input = document.getElementById("search");
-  filter = input.value;
+  filter = input.value.toUpperCase();
   table = document.getElementById("key-val-table");
   tr = table.getElementsByTagName("tr");
 
@@ -105,7 +105,7 @@ function search_table() {
     td = tr[i].getElementsByTagName("td")[0];
     if (td) {
       txtValue = td.textContent || td.innerText;
-      if (txtValue.indexOf(filter) > -1) {
+      if (txtValue.toUpperCase().indexOf(filter) > -1) {
         tr[i].style.display = "";
       } else {
         tr[i].style.display = "none";

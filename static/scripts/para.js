@@ -65,6 +65,7 @@ function cancel_edit(para){
     submit_btn_block.style.display = 'None';
     document.getElementById('paragraph').value = str;
 }
+/*
 function submit_para(){
     var xhttp = new XMLHttpRequest();
     var new_str = document.getElementById('paragraph').value;
@@ -84,6 +85,27 @@ function submit_para(){
     xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     xhttp.send('str='+new_str);
     str = new_str;
+}
+*/
+
+function submit_para(){
+    var new_str = document.getElementById('paragraph').value;
+
+    $.post(
+        "http://127.0.0.1:5000/edit_para/",
+        {"str": new_str},
+        function (data, status){
+            console.log(data);
+            if(true) {
+                alert("Update Success");
+            }
+            else{
+                alert("Something went wrong_para");
+            }
+            cancel_edit();
+        },
+        "json"
+    );
 }
 
 function getSelectionText() {
