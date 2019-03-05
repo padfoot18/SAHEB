@@ -43,7 +43,7 @@ def init_stuff():
     :return: None
     """
     load_data()
-    load_all_model()
+    # load_all_model()
 
 
 class ChatBot(Resource):
@@ -254,7 +254,7 @@ def edit_para():
         if conn:
             conn.close()
 
-    return new_paragraph[0][0]
+    return jsonify(para=new_paragraph[0][0])
 
 
 @app.route('/update/values/', methods=['POST', ])
