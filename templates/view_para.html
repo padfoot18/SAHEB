@@ -11,7 +11,8 @@
   <h2>Current Paragraph</h2>
   <form>
     <div class="form-group">
-      <textarea class="form-control" rows="20" id="paragraph" name="paragraph" readonly>{{ para }}</textarea>
+      <div id="para_div" style="display: block;">{{ para }}</div>
+      <textarea class="form-control" style="display: none;" rows="20" id="paragraph" name="paragraph" readonly>{{ para }}</textarea>
     </div>
     <div class="form-group" align="right" id="not_editable" style="display: block;">
         <button type="button" class="btn btn-primary" id="edit" name="edit" onclick="seteditable()">Edit</button>

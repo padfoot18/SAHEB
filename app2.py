@@ -43,7 +43,7 @@ def init_stuff():
     :return: None
     """
     load_data()
-    load_all_model()
+    # load_all_model()
 
 
 class ChatBot(Resource):
@@ -236,12 +236,16 @@ def edit_para():
         c = conn.cursor()
         c.execute('UPDATE paragraph SET para="' + new_paragraph + '";')
         # conn.commit()
-        keys_para = re.findall('zxyw[^\s.]*]', new_paragraph)
+        keys_para = re.findall('zxyw[^\s.]*', new_paragraph)
+        print(keys_para)
         c.execute('SELECT key FROM blank_data')
         keys_db = c.fetchall()
-        for item in keys_para:
-            if item not in keys_db:
-                c.execute("DELETE FROM blank_data WHERE key='"+item+"';")
+        print(keys_db)
+        for item in keys_db:
+            print(item[0])
+            if 'zxyw'+item[0] not in keys_para:
+                print('not in', item[0])
+                c.execute("DELETE FROM blank_data WHERE key='"+item[0]+"';")
         conn.commit()
 
         c.execute('select * from paragraph;')

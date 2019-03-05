@@ -1,3 +1,7 @@
+$("document").ready(function(){
+    highlight_load();
+});
+
 $("#add-new-modal").on("hidden.bs.modal", function () {
     $("#paragraph").focus();
 });
@@ -5,6 +9,28 @@ $("#add-new-modal").on("hidden.bs.modal", function () {
 $("#add-new-modal").on("shown.bs.modal", function () {
     $("#key_input").focus();
 });
+
+function highlight_load(){
+    $.get(
+        "http://127.0.0.1:5000/read/values/", 
+        function (data, status){
+            highlight_text(data);
+        },
+        "json");
+}
+
+function highlight_text(data) {
+    var text = document.getElementById('para_div').innerHTML;
+    // console.log(text);
+    var regex = new RegExp('zxyw[^\\s.]*', 'gm');
+    var text1 = text.replace(regex, '<span id="$&" style="color: green; font-weight: 700" >$&</span>')
+    document.getElementById('para_div').innerHTML = text1;
+
+    for (var i = 0; i < data.length ; i++) {
+        var element = document.getElementById('zxyw'+data[i]['key']);
+        element.title = data[i]['value'].replace(/<br>/gi, "\n");
+    }
+}
 
 var str;
 function add_key(new_key) {
@@ -51,6 +77,8 @@ function add_new() {
 
 function seteditable(){
     document.getElementById('paragraph').removeAttribute('readonly');
+    document.getElementById('paragraph').style.display = "block";
+    document.getElementById('para_div').style.display = "none";
     edit_btn_block = document.getElementById('not_editable');
     edit_btn_block.style.display = 'None';
     submit_btn_block = document.getElementById('editable');
@@ -59,11 +87,15 @@ function seteditable(){
 }
 function cancel_edit(para){
     document.getElementById('paragraph').readOnly = true;
+    document.getElementById('paragraph').style.display = "none";
+    document.getElementById('para_div').style.display = "block";
     edit_btn_block = document.getElementById('not_editable');
     edit_btn_block.style.display = 'Block';
     submit_btn_block = document.getElementById('editable');
     submit_btn_block.style.display = 'None';
     document.getElementById('paragraph').value = str;
+    document.getElementById('para_div').innerHTML = str;
+    highlight_load();
 }
 function submit_para(){
     var xhttp = new XMLHttpRequest();
