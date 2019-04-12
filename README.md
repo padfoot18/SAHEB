@@ -6,7 +6,7 @@
 <div align="center">
 
 
-<img src="./assets/SAHEB-demo.gif" width=300px>
+<img src="./assets/SAHEB-demo.gif" width=400px>
 
 </div>
 
