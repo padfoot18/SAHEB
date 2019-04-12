@@ -1,14 +1,21 @@
 # SAHEB
 ### (Somaiya Admission Help and Enquiry Bot)  
 
+### SAHEB Demo
+
+<div align="center">
+
+
+<img src="./assets/SAHEB-demo.gif" width=300px>
+
+</div>
+
 ## Installation steps:
 > **Note:** Currently we support **Linux** and **Windows** platforms and **Python 3.6**.
 
 > **Note:** Windows platform requires Git for Windows (for example, git), Visual Studio 2015/2017 with C++ build tools installed.
 
 > **Warning:** **Python 3.5 is not supported!**.
-
-## Installation:
 
  1. Install Git Large File Storage from `https://git-lfs.github.com/` (this is required bcs the ML models are stored on Git-lfs cloud) 
 
