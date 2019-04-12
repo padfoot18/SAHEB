@@ -148,7 +148,7 @@ def load_all_model():
 
     with g2.as_default():
         # paragraph model
-        model = build_model(configs.squad.squad, download=False)
+        model = build_model(configs.squad.squad, download=True)
 
     # glove embedding
     word_to_index, index_to_word, word_to_vec_map = read_glove_vecs('./model/glove/glove.6B.50d.h5')
@@ -450,4 +450,5 @@ api.add_resource(ChatBot, '/chat/')
 
 if __name__ == '__main__':
     app.secret_key = 'qwertyuuiopmkaejnfi;awnciquw4gabpiuebrjwabefiuawufbaeuhb'
+    load_all_model()
     app.run(host='127.0.0.1', port=5000, debug=True)
