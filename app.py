@@ -1,5 +1,5 @@
 # import modules for flask model
-from flask import Flask, jsonify, render_template, request, flash, redirect, url_for, session
+from flask import Flask, jsonify, render_template, request, flash, redirect, url_for, session, abort
 from flask_restful import Resource, Api
 from flask_cors import CORS
 from functools import wraps
@@ -18,10 +18,23 @@ from nltk import word_tokenize
 
 import sqlite3
 import re
+import random
+
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import threading
 
 app = Flask(__name__)
 CORS(app)
 api = Api(app)
+
+session_ids = dict()
+fallback_message = "Looks like your question is out of my scope. Kindly enter your email Id and our admin will resolve your query."
+
+# The mail addresses and password
+sender_address = 'bunnysmarty98@gmail.com'
+sender_pass = ''
 
 model = None
 model_basic_response = None
@@ -52,16 +65,37 @@ class ChatBot(Resource):
         Return response for the questions asked
         :return: answer -> str
         """
-        threshold = 45000
+        global session_ids
+        threshold = 60000   # 45000
         minimum_match = 1
         max_length = 10
 
+        orig_question = request.form['question']
+        orig_question = orig_question.strip()
+
+        curr_session_id = request.form['curr_session_id']
+        if curr_session_id not in session_ids:
+            session_ids[curr_session_id] = list()
+        print("{}".format(curr_session_id))
+
+        if len(session_ids[curr_session_id])>0 and session_ids[curr_session_id][-1].message_ == fallback_message:
+            # send email
+            print("SEND EMAIL")
+            email_thread = threading.Thread(target=send_email, args=(curr_session_id, orig_question))   # orig_question will contain user's email
+            # send_email(curr_session_id, "patrawalamurtaza52@gmail.com")
+            email_thread.start()
+            return "Thank you, admin will resolve your query via email shortly."
+
+        session_ids[curr_session_id].append(Message("user", orig_question))
+
+        print(session_ids)
+
         # append '?' to the question asked
-        question = request.form['question']
-        question = question.strip()
+        question = orig_question
         if question[-1] != "?":
             question += '?'
         words = question.split(' ')
+        # add question word in front, if not present
         question_words = ['what', 'why', 'how', 'where', 'when']
         counter = 0
         for word in words:
@@ -71,6 +105,8 @@ class ChatBot(Resource):
         if counter == 0:
             question = 'what '+ question
         print('QUESTION:', question)
+
+        response = ''
 
         # get answer from paragraph model
         with g2.as_default():
@@ -91,7 +127,7 @@ class ChatBot(Resource):
             question_list = remove_stop_words(question.lower())
             answer_list = remove_stop_words(answer_main.lower())
 
-            # find number of words matching in question and answer
+            # find number of words matching in question and anwer
             count = 0
             for i in question_list:
                 for j in answer_list:
@@ -100,7 +136,7 @@ class ChatBot(Resource):
             if count >= minimum_match:
                 # return response from paragraph model if more number of words are matched in question and answer
                 print('ANSWER:', answer_main)
-                return answer_main
+                response = answer_main
             else:
                 # return response from basic response model if few words are matched in question and answer
                 with g1.as_default():
@@ -112,14 +148,47 @@ class ChatBot(Resource):
 
                     if pred_index in [0, 1, 2]:
                         print('BASIC MODEL ANSWER:', basic_reply[pred_index])
-                        return basic_reply[pred_index]
+                        response = basic_reply[pred_index]
                     else:
-                        return "Looks like your question is out of my scope. I am still " \
-                               "learning but I am now only able to answer question related to Admission process"
+                        # default response
+                        response = fallback_message
         else:
+            # model confidence greater than threshold
             print('ANSWER:', answer_main)
-            return answer_main
+            response = answer_main
 
+        # save the chatbot response
+        session_ids[curr_session_id].append(Message("SAHEB Bot", response))
+
+        return response
+
+
+
+def send_email(client_session_id, client_email):
+    mail_content = generate_mail_content(client_session_id, client_email)
+
+    receiver_address = client_email
+    # Setup the MIME
+    message = MIMEMultipart()
+    message['From'] = sender_address
+    message['To'] = client_email
+    message['Subject'] = 'SAHEB chatbot user query, user email -> ' + client_email   # The subject line
+    # The body and the attachments for the mail
+    message.attach(MIMEText(mail_content, 'plain'))
+    # Create SMTP session for sending the mail
+    session = smtplib.SMTP('smtp.gmail.com', 587) # use gmail with port
+    session.starttls() #enable security
+    session.login(sender_address, sender_pass) # login with mail_id and password
+    text = message.as_string()
+    session.sendmail(sender_address, receiver_address, text)
+    session.quit()
+    print('Mail Sent')
+
+def generate_mail_content(client_session_id, client_email):
+    mail_content = 'CLIENT MAIL ID ---- {}\n\n\nUSER CHATS HISTORY\n\n'.format(client_email)
+    for msg in session_ids[client_session_id]:
+        mail_content += str(msg) + "\n"
+    return mail_content
 
 def remove_stop_words(words) -> list:
     """
@@ -180,15 +249,13 @@ def load_data():
 
 
 def is_logged_in(f):
-    """
-    decorator to check if user is logged in
-    """
     @wraps(f)
-    def wrap(*args, **kwargs):
-        if 'logged_in' in session:
-            return f(*args, **kwargs)
+    def wrap(*args,**kwargs):
+        print(session)
+        if('logged_in' in session):
+            return f(*args,**kwargs)
         else:
-            flash('Unauthorized, Please login', 'danger')
+            flash('Unauthorized, Please login','danger')
             return redirect(url_for('login'))
     return wrap
 
@@ -211,7 +278,6 @@ def key_values():
 
 
 @app.route('/read/values/')
-@is_logged_in
 def read_values():
     """ Read key-value pair from the database """
     formatted_data = []
@@ -224,10 +290,12 @@ def read_values():
             formatted_data.append(dict(id=items[0], key=items[1], value=items[2]))
         connection.commit()
         resp = jsonify(formatted_data)
+        resp.headers.add('Access-Control-Allow-Origin', '*')
         load_data()
     except Exception as exception:
         print(exception)
         resp = jsonify(success=False)
+        resp.headers.add('Access-Control-Allow-Origin', '*')
     finally:
         if connection:
             connection.close()
@@ -235,7 +303,6 @@ def read_values():
 
 
 @app.route('/edit_para/', methods=['POST', 'GET'])
-@is_logged_in
 def edit_para():
     """ Update edited paragraph in the database """
     if request.form['str']:
@@ -271,7 +338,6 @@ def edit_para():
 
 
 @app.route('/update/values/', methods=['POST', ])
-@is_logged_in
 def update_values():
     """ Update edited key-value in the database """
     try:
@@ -294,7 +360,6 @@ def update_values():
 
 
 @app.route('/insert/values/', methods=['POST', ])
-@is_logged_in
 def insert_values():
     """ Insert new key-value pair in the database  """
     if request.form['key'] and request.form['value']:
@@ -321,7 +386,6 @@ def insert_values():
 
 
 @app.route('/delete/values', methods=['POST', ])
-@is_logged_in
 def delete_values():
     """ Delete key value pair from the database """
     if request.form['key']:
@@ -344,7 +408,6 @@ def delete_values():
 
 
 @app.route('/para/')
-@is_logged_in
 def read_para():
     """ Read paragraph from the database """
     try:
@@ -432,7 +495,6 @@ def login():
             app.logger.info('NO USER')
             error = 'Username not found'
             return render_template('login.html', error=error)
-
     return render_template('login.html')
 
 
@@ -445,10 +507,35 @@ def logout():
     return redirect(url_for('login'))
 
 
+@app.route('/create_session')
+def create_session():
+    global session_ids
+
+    # generate a random no not in session_ids
+    curr_session_id = str(random.randint(100, 10000000))
+    while curr_session_id in session_ids:
+        curr_session_id = random.randint(100, 10000000)
+
+    session_ids[curr_session_id] = list()
+
+    return str(curr_session_id)
+
+
+class Message:
+    def __init__(self, from_, message):
+        self.from_ = from_
+        self.message_ = message
+
+    def __repr__(self):
+        return "{} :- {}".format(self.from_, self.message_)
+
+
+
+
 api.add_resource(ChatBot, '/chat/')
 
 
 if __name__ == '__main__':
-    app.secret_key = 'qwertyuuiopmkaejnfi;awnciquw4gabpiuebrjwabefiuawufbaeuhb'
+    app.secret_key="secret123"
     load_all_model()
     app.run(host='127.0.0.1', port=5000, debug=True)

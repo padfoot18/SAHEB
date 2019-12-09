@@ -16,7 +16,7 @@
       
   <div class="row">
     <div class="chatbox chatbox22 chatbox--tray">
-      <div class="chatbox__title">
+      <div class="chatbox__title" onclick="create_session()">
         <h5><a href="javascript:void()">Ask me anything!</a></h5>
         <button class="chatbox__title__close">
             <span>
@@ -93,6 +93,27 @@
     });
 })(jQuery);
 
+function create_session() {
+    if(sessionStorage.session_id){
+        // session already created
+    }else{
+        // create new session
+        $.get(
+            "http://127.0.0.1:5000/create_session",
+            function(data) {
+                if (typeof (Storage) !== "undefined") {
+                    sessionStorage.session_id = data;
+                    console.log("Session created ---> session_id = "+data);
+                } else {
+                    alert("Your browser doesn't support storage, you won't be able to report ask queries to admin.");
+                }
+            }
+        );
+    }
+
+
+}
+
 function loadDoc() {
   var xhttp = new XMLHttpRequest();
   var question = document.getElementById("btn-input").value;
@@ -136,7 +157,8 @@ function loadDoc() {
   };
   xhttp.open("POST", " http://127.0.0.1:5000/chat/", true);
   xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-  xhttp.send("question="+question);
+  console.log(sessionStorage.session_id);
+  xhttp.send("question="+question+"&curr_session_id="+sessionStorage.session_id);
 }
 
 function gotoBottom(id){
