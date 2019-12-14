@@ -25,9 +25,29 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import threading
 
+# flask-login
+from flask_login import LoginManager, UserMixin, current_user, login_user, login_required, logout_user
+
+
+# user model
+class User(UserMixin):
+    def __init__(self, id):
+        self.id = id
+        self.name = "user" + str(id)
+        self.password = self.name + "_secret"
+
+    def __repr__(self):
+        return "%d/%s/%s" % (self.id, self.name, self.password)
+
+
 app = Flask(__name__)
 CORS(app)
 api = Api(app)
+
+# flask-login
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = "login"
 
 session_ids = dict()
 fallback_message = "Looks like your question is out of my scope. Kindly enter your email Id and our admin will resolve your query."
@@ -163,7 +183,6 @@ class ChatBot(Resource):
         return response
 
 
-
 def send_email(client_session_id, client_email):
     mail_content = generate_mail_content(client_session_id, client_email)
 
@@ -184,11 +203,13 @@ def send_email(client_session_id, client_email):
     session.quit()
     print('Mail Sent')
 
+
 def generate_mail_content(client_session_id, client_email):
     mail_content = 'CLIENT MAIL ID ---- {}\n\n\nUSER CHATS HISTORY\n\n'.format(client_email)
     for msg in session_ids[client_session_id]:
         mail_content += str(msg) + "\n"
     return mail_content
+
 
 def remove_stop_words(words) -> list:
     """
@@ -248,16 +269,16 @@ def load_data():
             conn.close()
 
 
-def is_logged_in(f):
-    @wraps(f)
-    def wrap(*args,**kwargs):
-        print(session)
-        if('logged_in' in session):
-            return f(*args,**kwargs)
-        else:
-            flash('Unauthorized, Please login','danger')
-            return redirect(url_for('login'))
-    return wrap
+# def is_logged_in(f):
+#     @wraps(f)
+#     def wrap(*args,**kwargs):
+#         print(session)
+#         if('logged_in' in session):
+#             return f(*args,**kwargs)
+#         else:
+#             flash('Unauthorized, Please login','danger')
+#             return redirect(url_for('login'))
+#     return wrap
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -271,13 +292,14 @@ def index():
 
 
 @app.route('/key_values/')
-@is_logged_in
+@login_required
 def key_values():
     """ Display key-value pair table """
     return render_template('key_vals.html', js_files=['key-vals.js', ], css_files=['key-vals.css', ])
 
 
 @app.route('/read/values/')
+@login_required
 def read_values():
     """ Read key-value pair from the database """
     formatted_data = []
@@ -303,6 +325,7 @@ def read_values():
 
 
 @app.route('/edit_para/', methods=['POST', 'GET'])
+@login_required
 def edit_para():
     """ Update edited paragraph in the database """
     if request.form['str']:
@@ -338,6 +361,7 @@ def edit_para():
 
 
 @app.route('/update/values/', methods=['POST', ])
+@login_required
 def update_values():
     """ Update edited key-value in the database """
     try:
@@ -360,6 +384,7 @@ def update_values():
 
 
 @app.route('/insert/values/', methods=['POST', ])
+@login_required
 def insert_values():
     """ Insert new key-value pair in the database  """
     if request.form['key'] and request.form['value']:
@@ -386,6 +411,7 @@ def insert_values():
 
 
 @app.route('/delete/values', methods=['POST', ])
+@login_required
 def delete_values():
     """ Delete key value pair from the database """
     if request.form['key']:
@@ -408,6 +434,7 @@ def delete_values():
 
 
 @app.route('/para/')
+@login_required
 def read_para():
     """ Read paragraph from the database """
     try:
@@ -478,8 +505,13 @@ def login():
             password = data[2]
             if sha256_crypt.verify(password_candidate, password):
                 app.logger.info('PASSWORD MATCHED')
-                session['logged_in'] = True
-                session['email'] = email
+
+                # flask - login
+                user = User(email)
+                login_user(user)
+
+                # session['logged_in'] = True
+                # session['email'] = email
 
                 flash('You are now logged in', 'success')
 
@@ -498,13 +530,25 @@ def login():
     return render_template('login.html')
 
 
-@app.route('/logout')
-@is_logged_in
+@app.route("/logout")
+@login_required
 def logout():
-    """ Log out from the site """
-    session.clear()
+    logout_user()
     flash('You are now logged out ', 'success')
     return redirect(url_for('login'))
+# @app.route('/logout')
+# @is_logged_in
+# def logout():
+#     """ Log out from the site """
+#     session.clear()
+#     flash('You are now logged out ', 'success')
+#     return redirect(url_for('login'))
+
+
+# callback to reload the user object
+@login_manager.user_loader
+def load_user(userId):
+    return User(userId)
 
 
 @app.route('/create_session')
@@ -528,8 +572,6 @@ class Message:
 
     def __repr__(self):
         return "{} :- {}".format(self.from_, self.message_)
-
-
 
 
 api.add_resource(ChatBot, '/chat/')
