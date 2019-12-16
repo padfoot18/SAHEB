@@ -2,7 +2,7 @@ Flask==1.0.2
 WTForms==2.2.1
 passlib==1.7.1
 nltk==3.2.5
-tensorflow==1.10.0
+tensorflow==1.15.0
 Keras==2.2.0
 deeppavlov==0.1.6
 Flask_RESTful==0.3.7
