@@ -25,32 +25,24 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import threading
 
-# flask-login
-from flask_login import LoginManager, UserMixin, current_user, login_user, login_required, logout_user
-
-
-# user model
-class User(UserMixin):
-    def __init__(self, id):
-        self.id = id
-        self.name = "user" + str(id)
-        self.password = self.name + "_secret"
-
-    def __repr__(self):
-        return "%d/%s/%s" % (self.id, self.name, self.password)
-
 
 app = Flask(__name__)
+app.secret_key = b'U\x80\xfe\xd4\xe5\xff\x0c\xb1X\x7f\xac\xdc\x06\x13\x1b&'
 CORS(app)
 api = Api(app)
 
-# flask-login
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = "login"
+
+@app.after_request
+def add_security_headers(resp):
+    resp.headers.add('Access-Control-Allow-Headers',
+                     "Origin, X-Requested-With, Content-Type, Accept, x-auth")
+    return resp
+
 
 session_ids = dict()
-fallback_message = "Looks like your question is out of my scope. Kindly enter your email Id and our admin will resolve your query."
+fallback_message = "Looks like your question is out of my scope. Kindly enter your email Id and our admin will " \
+                   "resolve your query. "
+
 
 # The mail addresses and password
 sender_address = 'bunnysmarty98@gmail.com'
@@ -287,45 +279,57 @@ def index():
     if 'logged_in' in session:
         if session['logged_in']:
             return redirect('/para/')
+        else:
+            render_template('login.html')
     else:
         return render_template('login.html')
 
 
 @app.route('/key_values/')
-@login_required
 def key_values():
     """ Display key-value pair table """
-    return render_template('key_vals.html', js_files=['key-vals.js', ], css_files=['key-vals.css', ])
+    if 'logged_in' in session:
+        if session['logged_in']:
+            return render_template('key_vals.html', js_files=['key-vals.js', ], css_files=['key-vals.css', ])
+        else:
+            return render_template('login.html')
+    else:
+        return render_template('login.html')
 
 
 @app.route('/read/values/')
-@login_required
 def read_values():
     """ Read key-value pair from the database """
-    formatted_data = []
-    try:
-        connection = sqlite3.connect('test.db')
-        c = connection.cursor()
-        c.execute('SELECT * FROM blank_data')
-        table_data = c.fetchall()
-        for items in table_data:
-            formatted_data.append(dict(id=items[0], key=items[1], value=items[2]))
-        connection.commit()
-        resp = jsonify(formatted_data)
-        resp.headers.add('Access-Control-Allow-Origin', '*')
-        load_data()
-    except Exception as exception:
-        print(exception)
-        resp = jsonify(success=False)
-        resp.headers.add('Access-Control-Allow-Origin', '*')
-    finally:
-        if connection:
-            connection.close()
-    return resp
+    print(session)
+    if 'logged_in' in session:
+        if session['logged_in']:
+            formatted_data = []
+            try:
+                connection = sqlite3.connect('test.db')
+                c = connection.cursor()
+                c.execute('SELECT * FROM blank_data')
+                table_data = c.fetchall()
+                for items in table_data:
+                    formatted_data.append(dict(id=items[0], key=items[1], value=items[2]))
+                connection.commit()
+                resp = jsonify(formatted_data)
+                resp.headers.add('Access-Control-Allow-Origin', '*')
+                load_data()
+            except Exception as exception:
+                print(exception)
+                resp = jsonify(success=False)
+                resp.headers.add('Access-Control-Allow-Origin', '*')
+            finally:
+                if connection:
+                    connection.close()
+            return resp
+        else:
+            return render_template('login.html')
+    else:
+        return render_template('login.html')
 
 
 @app.route('/edit_para/', methods=['POST', 'GET'])
-@login_required
 def edit_para():
     """ Update edited paragraph in the database """
     if request.form['str']:
@@ -361,7 +365,6 @@ def edit_para():
 
 
 @app.route('/update/values/', methods=['POST', ])
-@login_required
 def update_values():
     """ Update edited key-value in the database """
     try:
@@ -384,7 +387,6 @@ def update_values():
 
 
 @app.route('/insert/values/', methods=['POST', ])
-@login_required
 def insert_values():
     """ Insert new key-value pair in the database  """
     if request.form['key'] and request.form['value']:
@@ -411,7 +413,6 @@ def insert_values():
 
 
 @app.route('/delete/values', methods=['POST', ])
-@login_required
 def delete_values():
     """ Delete key value pair from the database """
     if request.form['key']:
@@ -434,23 +435,29 @@ def delete_values():
 
 
 @app.route('/para/')
-@login_required
 def read_para():
     """ Read paragraph from the database """
-    try:
-        conn = sqlite3.connect('test.db')
-        c = conn.cursor()
-        c.execute('select * from paragraph')
-        paragraph = c.fetchall()
-        conn.commit()
-    except sqlite3.IntegrityError:
-        return {"error"}
-    except Exception as exception:
-        print(exception)
-    finally:
-        if conn:
-            conn.close()
-    return render_template('view_para.html', para=paragraph[0][0], js_files=['para.js', ])
+    if 'logged_in' in session:
+        if session['logged_in']:
+            try:
+                conn = sqlite3.connect('test.db')
+                c = conn.cursor()
+                c.execute('select * from paragraph')
+                paragraph = c.fetchall()
+                conn.commit()
+            except sqlite3.IntegrityError:
+                return {"error"}
+            except Exception as exception:
+                print(exception)
+            finally:
+                if conn:
+                    conn.close()
+
+            return render_template('view_para.html', para=paragraph[0][0], js_files=['para.js', ])
+        else:
+            return render_template('login.html')
+    else:
+        return render_template('login.html')
 
 
 class RegisterForm(Form):
@@ -466,7 +473,6 @@ class RegisterForm(Form):
 
 
 @app.route('/register', methods=['GET', 'POST'])
-@is_logged_in
 def register():
     """ Register new admin user """
     form = RegisterForm(request.form)
@@ -506,23 +512,18 @@ def login():
             if sha256_crypt.verify(password_candidate, password):
                 app.logger.info('PASSWORD MATCHED')
 
-                # flask - login
-                user = User(email)
-                login_user(user)
-
-                # session['logged_in'] = True
-                # session['email'] = email
+                session['logged_in'] = True
+                session['email'] = email
 
                 flash('You are now logged in', 'success')
-
+                cursor.close()
                 return redirect('/para/')
 
             else:
                 app.logger.info('PASSWORD NOT MATCHED')
                 error = 'Incorrect Password'
+                cursor.close()
                 return render_template('login.html', error=error)
-
-            cursor.close()
         else:
             app.logger.info('NO USER')
             error = 'Username not found'
@@ -530,25 +531,18 @@ def login():
     return render_template('login.html')
 
 
-@app.route("/logout")
-@login_required
+@app.route('/logout')
 def logout():
-    logout_user()
-    flash('You are now logged out ', 'success')
-    return redirect(url_for('login'))
-# @app.route('/logout')
-# @is_logged_in
-# def logout():
-#     """ Log out from the site """
-#     session.clear()
-#     flash('You are now logged out ', 'success')
-#     return redirect(url_for('login'))
-
-
-# callback to reload the user object
-@login_manager.user_loader
-def load_user(userId):
-    return User(userId)
+    """ Log out from the site """
+    if 'logged_in' in session:
+        if session['logged_in']:
+            session.clear()
+            flash('You are now logged out ', 'success')
+            return redirect(url_for('login'))
+        else:
+            return render_template('login.html')
+    else:
+        return render_template('login.html')
 
 
 @app.route('/create_session')
@@ -578,6 +572,5 @@ api.add_resource(ChatBot, '/chat/')
 
 
 if __name__ == '__main__':
-    app.secret_key="secret123"
-    load_all_model()
+    # load_all_model()
     app.run(host='127.0.0.1', port=5000, debug=True)
