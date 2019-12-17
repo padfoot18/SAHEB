@@ -30,7 +30,8 @@ CORS(app)
 api = Api(app)
 
 session_ids = dict()
-fallback_message = "Looks like your question is out of my scope. Kindly enter your email Id and our admin will resolve your query."
+fallback_message = "Looks like your question is out of my scope. Kindly enter your email Id and our admin will " \
+                   "resolve your query. "
 
 # The mail addresses and password
 sender_address = 'bunnysmarty98@gmail.com'
@@ -163,7 +164,6 @@ class ChatBot(Resource):
         return response
 
 
-
 def send_email(client_session_id, client_email):
     mail_content = generate_mail_content(client_session_id, client_email)
 
@@ -184,11 +184,13 @@ def send_email(client_session_id, client_email):
     session.quit()
     print('Mail Sent')
 
+
 def generate_mail_content(client_session_id, client_email):
     mail_content = 'CLIENT MAIL ID ---- {}\n\n\nUSER CHATS HISTORY\n\n'.format(client_email)
     for msg in session_ids[client_session_id]:
         mail_content += str(msg) + "\n"
     return mail_content
+
 
 def remove_stop_words(words) -> list:
     """
@@ -251,7 +253,6 @@ def load_data():
 def is_logged_in(f):
     @wraps(f)
     def wrap(*args,**kwargs):
-        print(session)
         if('logged_in' in session):
             return f(*args,**kwargs)
         else:
@@ -278,6 +279,7 @@ def key_values():
 
 
 @app.route('/read/values/')
+@is_logged_in
 def read_values():
     """ Read key-value pair from the database """
     formatted_data = []
@@ -303,6 +305,7 @@ def read_values():
 
 
 @app.route('/edit_para/', methods=['POST', 'GET'])
+@is_logged_in
 def edit_para():
     """ Update edited paragraph in the database """
     if request.form['str']:
@@ -338,6 +341,7 @@ def edit_para():
 
 
 @app.route('/update/values/', methods=['POST', ])
+@is_logged_in
 def update_values():
     """ Update edited key-value in the database """
     try:
@@ -360,6 +364,7 @@ def update_values():
 
 
 @app.route('/insert/values/', methods=['POST', ])
+@is_logged_in
 def insert_values():
     """ Insert new key-value pair in the database  """
     if request.form['key'] and request.form['value']:
@@ -386,6 +391,7 @@ def insert_values():
 
 
 @app.route('/delete/values', methods=['POST', ])
+@is_logged_in
 def delete_values():
     """ Delete key value pair from the database """
     if request.form['key']:
@@ -408,6 +414,7 @@ def delete_values():
 
 
 @app.route('/para/')
+@is_logged_in
 def read_para():
     """ Read paragraph from the database """
     try:
@@ -530,12 +537,10 @@ class Message:
         return "{} :- {}".format(self.from_, self.message_)
 
 
-
-
 api.add_resource(ChatBot, '/chat/')
 
 
 if __name__ == '__main__':
     app.secret_key="secret123"
-    load_all_model()
+    # load_all_model()
     app.run(host='127.0.0.1', port=5000, debug=True)

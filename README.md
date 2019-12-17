@@ -47,5 +47,5 @@
  
  3. For chat bot, open `frontend/popup.html` in any browser
  
- 4. For admin site, open `http://localhost:5000/` in any browser
+ 4. For admin site, open `http://127.0.0.1:5000/` in any browser. (Make sure u r not using `http://localhost:5000/` as it creates some problem with sessions!)
 	 
