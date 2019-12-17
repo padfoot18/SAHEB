@@ -542,5 +542,5 @@ api.add_resource(ChatBot, '/chat/')
 
 if __name__ == '__main__':
     app.secret_key="secret123"
-    # load_all_model()
+    load_all_model()
     app.run(host='127.0.0.1', port=5000, debug=True)
