@@ -69,7 +69,7 @@ class ChatBot(Resource):
                 counter += 1
 
         if counter == 0:
-            question = 'what '+ question
+            question = 'what ' + question
         print('QUESTION:', question)
 
         # get answer from paragraph model
@@ -87,35 +87,10 @@ class ChatBot(Resource):
 
         # select response from basic response and paragraph model if the confidence is less than the threshold
         if answer[2][0] < threshold:
-            # remove unnecessary stopwords from question and answer for comparison
-            question_list = remove_stop_words(question.lower())
-            answer_list = remove_stop_words(answer_main.lower())
-
-            # find number of words matching in question and answer
-            count = 0
-            for i in question_list:
-                for j in answer_list:
-                    if i == j:
-                        count += 1
-            if count >= minimum_match:
-                # return response from paragraph model if more number of words are matched in question and answer
-                print('ANSWER:', answer_main)
-                return answer_main
-            else:
-                # return response from basic response model if few words are matched in question and answer
-                with g1.as_default():
-                    x_test = sentences_to_indices(np.array([question]), word_to_index, max_length)
-                    pred = model_basic_response.predict(x_test)
-                    pred_index = int(np.argmax(pred, axis=1)[0])
-
-                    basic_reply = ['Hi there, how can I help?', 'See you later, thanks for visiting', 'Happy to help!']
-
-                    if pred_index in [0, 1, 2]:
-                        print('BASIC MODEL ANSWER:', basic_reply[pred_index])
-                        return basic_reply[pred_index]
-                    else:
-                        return "Looks like your question is out of my scope. I am still " \
-                               "learning but I am now only able to answer question related to Admission process"
+            print('ANSWER: NOT FOUND')
+            default_ans = "Looks like your question is out of my scope. I am still " \
+                          "learning but I am now only able to answer question related to Admission process"
+            return "-1"
         else:
             print('ANSWER:', answer_main)
             return answer_main
@@ -183,6 +158,7 @@ def is_logged_in(f):
     """
     decorator to check if user is logged in
     """
+
     @wraps(f)
     def wrap(*args, **kwargs):
         if 'logged_in' in session:
@@ -190,6 +166,7 @@ def is_logged_in(f):
         else:
             flash('Unauthorized, Please login', 'danger')
             return redirect(url_for('login'))
+
     return wrap
 
 
@@ -252,9 +229,9 @@ def edit_para():
         print(keys_db)
         for item in keys_db:
             print(item[0])
-            if 'zxyw'+item[0] not in keys_para:
+            if 'zxyw' + item[0] not in keys_para:
                 print('not in', item[0])
-                c.execute("DELETE FROM blank_data WHERE key='"+item[0]+"';")
+                c.execute("DELETE FROM blank_data WHERE key='" + item[0] + "';")
         conn.commit()
         load_data()
         c.execute('select * from paragraph;')
@@ -280,7 +257,7 @@ def update_values():
         if request.form['id'] and request.form['value']:
             i = request.form['id']
             value = request.form['value']
-            sql = 'update blank_data set `value` = "'+value+'" where `id` = "'+i+'";'
+            sql = 'update blank_data set `value` = "' + value + '" where `id` = "' + i + '";'
             c.execute(sql)
             connection.commit()
             resp = jsonify(success=True, id=i, value=value)
@@ -306,7 +283,7 @@ def insert_values():
             sql = 'INSERT INTO blank_data (`key`, `value`) VALUES("' + key + '", "' + value + '");'
             c.execute(sql)
             connection.commit()
-            sql = 'select * from blank_data where `key` = "'+key+'";'
+            sql = 'select * from blank_data where `key` = "' + key + '";'
             c.execute(sql)
             data = c.fetchall()
             formatted_data = {"id": data[0][0], "key": data[0][1], "value": data[0][2]}
@@ -330,7 +307,7 @@ def delete_values():
         try:
             connection = sqlite3.connect('test.db')
             c = connection.cursor()
-            sql = 'delete from blank_data where `key` = "'+key+'";'
+            sql = 'delete from blank_data where `key` = "' + key + '";'
             c.execute(sql)
             connection.commit()
             resp = jsonify(success=True)
@@ -389,7 +366,8 @@ def register():
         try:
             connection = sqlite3.connect('test.db')
             cursor = connection.cursor()
-            cursor.execute("INSERT INTO users(name,email,password) VALUES('"+name+"','"+email+"','"+password+"')")
+            cursor.execute(
+                "INSERT INTO users(name,email,password) VALUES('" + name + "','" + email + "','" + password + "')")
             connection.commit()
             connection.close()
             return redirect(url_for('login'))
@@ -409,7 +387,7 @@ def login():
         password_candidate = request.form['password']
         connection = sqlite3.connect('test.db')
         cursor = connection.cursor()
-        result = cursor.execute("SELECT * FROM users WHERE email = '"+email+"'")
+        result = cursor.execute("SELECT * FROM users WHERE email = '" + email + "'")
         data = result.fetchall()[0]
         if result.arraysize > 0:
             password = data[2]
@@ -446,7 +424,6 @@ def logout():
 
 
 api.add_resource(ChatBot, '/chat/')
-
 
 if __name__ == '__main__':
     app.secret_key = 'qwertyuuiopmkaejnfi;awnciquw4gabpiuebrjwabefiuawufbaeuhb'
