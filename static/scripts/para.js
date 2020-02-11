@@ -1,3 +1,6 @@
+let SERVER_IP = "172.17.1.45";
+let SERVER_PORT = "5000";
+
 $("document").ready(function(){
     highlight_load();
 });
@@ -12,7 +15,7 @@ $("#add-new-modal").on("shown.bs.modal", function () {
 
 function highlight_load(){
     $.get(
-        "http://127.0.0.1:5000/read/values/", 
+        "http://"+SERVER_IP+":"+SERVER_PORT+"/read/values/",
         function (data, status){
             highlight_text(data);
         },
@@ -58,7 +61,7 @@ function add_new() {
     value = $("#value_input").val();
     if (key != null && value != null){
         $.post(
-            "http://127.0.0.1:5000/insert/values/",
+            "http://"+SERVER_IP+":"+SERVER_PORT+"/insert/values/",
             {"key": key, "value": value.replace(/\n/gi, "<br>")},
             function (data, status) {
                 if (!data["success"])
@@ -103,7 +106,7 @@ function submit_para(){
     var new_str = para.value;
 
     $.post(
-        "http://127.0.0.1:5000/edit_para/",
+        "http://"+SERVER_IP+":"+SERVER_PORT+"/edit_para/",
         {"str": new_str},
         function (data, status){
             if(data["para"] === new_str) {

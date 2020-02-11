@@ -1,6 +1,9 @@
 // TODO(2) if response/data["success"] = false, then exception occurred in server
+let SERVER_IP = "172.17.1.45";
+let SERVER_PORT = "5000";
+
 $("document").ready(function(){
-    $.get("http://127.0.0.1:5000/read/values/", function (data, status){
+    $.get("http://"+SERVER_IP+":"+SERVER_PORT+"/read/values/", function (data, status){
         add_row_in_table(data);
     }, "json");
 });
@@ -11,7 +14,7 @@ function update_value(id) {
     if (id != null){
         key = $("#key_"+id).text();
         value = $("#input_"+id).val();
-        $.post("http://127.0.0.1:5000/update/values/",
+        $.post("http://"+SERVER_IP+":"+SERVER_PORT+"/update/values/",
             {"id": id, "value": value.replace(/\n/gi, "<br>")},
             function (data, status) {
                 if (status === "success") {
@@ -80,7 +83,7 @@ function add_row_in_table(data){
 function delete_value(id) {
     if (id != null){
         $.post(
-            "http://127.0.0.1:5000/delete/values/",
+            "http://"+SERVER_IP+":"+SERVER_PORT+"/delete/values/",
             {"id": id},
             function (data, status) {
                 if (!data["success"])
