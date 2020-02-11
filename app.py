@@ -32,7 +32,6 @@ index_to_word = None
 word_to_vec_map = None
 
 # g1 and g2 are two graphs to load both models
-g1 = tf.Graph()
 g2 = tf.Graph()
 
 
@@ -114,19 +113,14 @@ def load_all_model():
     global model
     global model_basic_response
     global word_to_index, index_to_word, word_to_vec_map
-    global g1
     global g2
-
-    with g1.as_default():
-        # basic response model
-        model_basic_response = load_model('./model/basic_response_model/trained_lstm_128_128_dropout_4_3.h5')
 
     with g2.as_default():
         # paragraph model
         model = build_model(configs.squad.squad, download=True)
 
     # glove embedding
-    word_to_index, index_to_word, word_to_vec_map = read_glove_vecs('./model/glove/glove.6B.50d.h5')
+    # word_to_index, index_to_word, word_to_vec_map = read_glove_vecs('./model/glove/glove.6B.50d.h5')
 
 
 def load_data():
