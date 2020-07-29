@@ -68,7 +68,7 @@ tensorflow-estimator==1.15.1
 termcolor==1.1.0
 tqdm==4.23.4
 urllib3==1.23
-uvicorn==0.9.0
+uvicorn==0.11.7
 uvloop==0.14.0
 websockets==8.1
 Werkzeug==0.15.2
