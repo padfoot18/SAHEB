@@ -28,7 +28,7 @@ h5py==2.8.0
 httptools==0.0.13
 idna==2.7
 itsdangerous==1.1.0
-Jinja2==2.10.1
+Jinja2==2.11.3
 joblib==0.14.0
 jsonschema==3.0.1
 Keras==2.2.4
