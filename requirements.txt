@@ -13,7 +13,7 @@ dataclasses==0.7
 DAWG-Python==0.7.2
 deeppavlov==0.1.6
 docopt==0.6.2
-fastapi==0.38.1
+fastapi==0.65.2
 flasgger==0.9.1
 Flask==1.1.1
 Flask-Cors==3.0.6
