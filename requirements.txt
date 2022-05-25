@@ -46,7 +46,7 @@ passlib==1.7.1
 protobuf==3.7.1
 pycparser==2.19
 pydantic==0.32.2
-PyJWT==1.7.1
+PyJWT==2.4.0
 pymorphy2==0.8
 pymorphy2-dicts==2.4.393442.3710985
 pymorphy2-dicts-ru==2.4.404381.4453942
