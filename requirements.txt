@@ -38,7 +38,7 @@ Markdown==3.1
 MarkupSafe==1.1.1
 mistune==0.8.4
 nltk==3.2.5
-numpy==1.18.1
+numpy==1.22.0
 opt-einsum==3.1.0
 overrides==1.9
 pandas==0.23.1
