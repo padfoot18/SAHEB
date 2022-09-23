@@ -43,7 +43,7 @@ opt-einsum==3.1.0
 overrides==1.9
 pandas==0.23.1
 passlib==1.7.1
-protobuf==3.7.1
+protobuf==3.18.3
 pycparser==2.19
 pydantic==0.32.2
 PyJWT==1.7.1
